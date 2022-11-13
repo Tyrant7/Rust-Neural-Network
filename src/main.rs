@@ -1,9 +1,9 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-/* mod neural_network; */
+mod neural_network;
 
-/* use neural_network::{NeuralNetworkManager, NeuralNetwork}; */
+use neural_network::{neural_network_manager, NeuralNetwork};
 
 fn main() {
     println!("Hello, world!");
