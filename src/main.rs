@@ -3,7 +3,7 @@
 
 mod neural_network;
 
-use neural_network::{neural_network_manager, NeuralNetwork};
+use neural_network::{NeuralNetwork};
 
 fn main() {
     println!("Hello, world!");
