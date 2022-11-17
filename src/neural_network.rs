@@ -150,9 +150,37 @@ impl NeuralNetwork {
 
     fn forward_propagate(&mut self, inputs: Vec<Input>) {
 
-        for input in inputs {
+        let mut i = 0;
+        for input in inputs.len() {
 
+            self.activation_layers[0][i] = max(0, inputs[i].value * self.weight_layers[0][i] + neural_network_manager.bias);
             input.value;
+            
+            i += 1;
+        }
+        
+        let mut i1 = 0;
+        while i < self.activation_layers.len() {
+
+            let mut i2 = 0;
+            while i2 < self.activation_layers[last_layer_index].len() {
+
+                self.activation_layers[i1][i2] = 0;
+                
+                let mut i3 = 0;
+                while i3 < self.activation_layers[(i1 - 1) as usize].len() {
+
+                    self.activation_layers[i1][i2] += self.activation_layers[i1][i3] * self.weight_layers[i1][i2][i3];
+
+                    i3 += 1;
+                }
+                
+                self.activation_layers[i1][i2] = max(0, self.activation_layers[i1][i2] = self.bias);
+
+                i2 += 1;
+            }
+
+            i1 += 1;
         }
     }
 
@@ -163,7 +191,24 @@ impl NeuralNetwork {
 
     fn mutate(&mut self) {
 
+        let mut i1 = 0;
+        while i < self.activation_layers.len() {
 
+            let mut i2 = 0;
+            while i2 < self.activation_layers[last_layer_index].len() {
+                
+                let mut weight_i = 0;
+                
+                while weight_i < self.weight_layers[i1][i2].len() {
+                 
+                    self.weight_layers[i1][i2][weight_i] += random() * neural_network_manager.learning_rate - random() * neural_network_manager.learning_rate;
+                    weight_i += 1;
+                }
+                i2 += 1;
+            }
+            
+            i1 += 1;
+        }
     }
 
     fn visualize(&mut self) {
