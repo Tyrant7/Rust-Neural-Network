@@ -1,7 +1,5 @@
 use std::sync::{Mutex, MutexGuard};
 use std::cmp::max;
-
-use rand::Rng;
 extern crate rand;
 
 pub struct NeuralNetworkManager {
@@ -89,42 +87,42 @@ impl NeuralNetwork {
 
         // Construct the input layer
 
-        let mut i = 0;
-        while i < input_count {
+        let mut input_i = 0;
+        while input_i < input_count {
 
-            self.weight_layers[i as usize].push(vec![i as f32]);
-            self.activation_layers[i as usize].push(i as f32);
+            self.weight_layers[input_i as usize].push(vec![input_i as f32]);
+            self.activation_layers[input_i as usize].push(input_i as f32);
 
-            i += 1;
+            input_i += 1;
         }
 
         // Construct hidden layers
 
-        let mut i1 = 0;
-        while i1 < neural_network_manager.hidden_layers_count {
+        let mut layer_i = 0;
+        while layer_i < neural_network_manager.hidden_layers_count {
 
             self.weight_layers.push(vec![]);
             self.activation_layers.push(vec![]);
 
-            let mut i2 = 0;
-            while i2 < neural_network_manager.hidden_perceptron_count {
+            let mut perceptron_i = 0;
+            while perceptron_i < neural_network_manager.hidden_perceptron_count {
 
-                self.weight_layers[i1 as usize].push(vec![]);
+                self.weight_layers[layer_i as usize].push(vec![]);
 
-                let mut i3 = 0;
-                while i3 < self.activation_layers[(i1 - 1) as usize].len() {
+                let mut activation_i = 0;
+                while activation_i < self.activation_layers[(layer_i - 1) as usize].len() {
 
-                    self.weight_layers[i1 as usize][i2 as usize].push(0.);
+                    self.weight_layers[layer_i as usize][perceptron_i as usize].push(0.);
 
-                    i3 += 1;
+                    activation_i += 1;
                 }
 
-                self.activation_layers[i1 as usize].push(0.);
+                self.activation_layers[layer_i as usize].push(0.);
 
-                i2 += 1;
+                perceptron_i += 1;
             }
 
-            i1 += 1;
+            layer_i += 1;
         }
 
         self.weight_layers.push(vec![]);
@@ -132,22 +130,22 @@ impl NeuralNetwork {
 
         let last_layer_index = self.activation_layers.len() - 1;
 
-        i1 = 0;
-        while i < output_count {
+        input_i = 0;
+        while input_i < output_count {
 
             self.weight_layers[last_layer_index].push(vec![]);
 
-            let mut i2 = 0;
-            while i2 < self.activation_layers[last_layer_index - 1].len() {
+            let mut activation_i = 0;
+            while activation_i < self.activation_layers[last_layer_index - 1].len() {
 
-                self.weight_layers[last_layer_index][i1].push(0.);
+                self.weight_layers[last_layer_index][input_i].push(0.);
 
-                i2 += 1;
+                activation_i += 1;
             }
 
             self.activation_layers[last_layer_index].push(0.);
 
-            i1 += 1;
+            input_i += 1;
         }
     }
 
