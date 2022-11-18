@@ -1,8 +1,14 @@
-use std::sync::Mutex;
+use std::sync::{Mutex, MutexGuard};
+use std::cmp::max;
+
+use rand::Rng;
+extern crate rand;
 
 pub struct NeuralNetworkManager {
     id_index: i32,
     networks: Vec<( i32, NeuralNetwork )>,
+    bias: f32,
+    learning_rate: f32,
     hidden_layers_count: usize,
     hidden_perceptron_count: usize,
 }
@@ -19,16 +25,14 @@ impl NeuralNetworkManager {
     }
 }
 
-static neural_network_manager: Mutex<NeuralNetworkManager> = Mutex::new(NeuralNetworkManager {
+static neural_network_manager: MutexGuard<NeuralNetworkManager> = Mutex::new(NeuralNetworkManager {
     id_index: 1,
     networks: vec![],
+    bias: 1.,
+    learning_rate: 1.,
     hidden_layers_count: 2,
     hidden_perceptron_count: 3,
-});
-
-fn a() {
-    neural_network_manager.lock();
-}
+}).lock().unwrap();
 
 /* 
 static neural_network_manager: Mutex<NeuralNetworkManager> = NeuralNetworkManager {
@@ -60,7 +64,6 @@ struct Input {
 
 struct Output {
     name: String,
-
 }
 
 impl NeuralNetwork {
@@ -150,37 +153,37 @@ impl NeuralNetwork {
 
     fn forward_propagate(&mut self, inputs: Vec<Input>) {
 
-        let mut i = 0;
-        for input in inputs.len() {
+        let mut input_i = 0;
+        while input_i < inputs.len() {
 
-            self.activation_layers[0][i] = max(0, inputs[i].value * self.weight_layers[0][i] + neural_network_manager.bias);
-            input.value;
+            self.activation_layers[0][input_i] = max(0, inputs[input_i].value * self.weight_layers[0][input_i] + neural_network_manager.bias);
+            inputs[input_i].value;
             
-            i += 1;
+            input_i += 1;
         }
         
-        let mut i1 = 0;
-        while i < self.activation_layers.len() {
+        let mut layer_i = 1;
+        while layer_i < self.activation_layers.len() {
 
-            let mut i2 = 0;
-            while i2 < self.activation_layers[last_layer_index].len() {
+            let mut activation_index = 0;
+            while activation_index < self.activation_layers[layer_i].len() {
 
-                self.activation_layers[i1][i2] = 0;
+                self.activation_layers[layer_i][activation_index] = 0;
                 
-                let mut i3 = 0;
-                while i3 < self.activation_layers[(i1 - 1) as usize].len() {
+                let mut previous_layer_i = 0;
+                while previous_layer_i < self.activation_layers[(layer_i - 1) as usize].len() {
 
-                    self.activation_layers[i1][i2] += self.activation_layers[i1][i3] * self.weight_layers[i1][i2][i3];
+                    self.activation_layers[layer_i][activation_index] += self.activation_layers[layer_i][previous_layer_i] * self.weight_layers[layer_i][activation_index][previous_layer_i];
 
-                    i3 += 1;
+                    previous_layer_i += 1;
                 }
                 
-                self.activation_layers[i1][i2] = max(0, self.activation_layers[i1][i2] = self.bias);
+                self.activation_layers[layer_i][activation_index] = max(0, self.activation_layers[layer_i][activation_index] = neural_network_manager.bias);
 
-                i2 += 1;
+                activation_index += 1;
             }
 
-            i1 += 1;
+            layer_i += 1;
         }
     }
 
@@ -191,23 +194,26 @@ impl NeuralNetwork {
 
     fn mutate(&mut self) {
 
-        let mut i1 = 0;
-        while i < self.activation_layers.len() {
+        let mut rng = rand::thread_rng();
 
-            let mut i2 = 0;
-            while i2 < self.activation_layers[last_layer_index].len() {
+        let mut layer_i = 0;
+        while layer_i < self.activation_layers.len() {
+
+            let mut activation_index = 0;
+            while activation_index < self.activation_layers[layer_i].len() {
                 
                 let mut weight_i = 0;
                 
-                while weight_i < self.weight_layers[i1][i2].len() {
+                while weight_i < self.weight_layers[layer_i][activation_index].len() {
                  
-                    self.weight_layers[i1][i2][weight_i] += random() * neural_network_manager.learning_rate - random() * neural_network_manager.learning_rate;
+                    self.weight_layers[layer_i][activation_index][weight_i] += rng.gen::<f32>() * neural_network_manager.learning_rate - rng.gen::<f32>() * neural_network_manager.learning_rate;
                     weight_i += 1;
                 }
-                i2 += 1;
+
+                activation_index += 1;
             }
             
-            i1 += 1;
+            layer_i += 1;
         }
     }
 
