@@ -156,7 +156,7 @@ impl NeuralNetwork {
         let mut input_i = 0;
         while input_i < inputs.len() {
 
-            self.activation_layers[0][input_i] = max(0, inputs[input_i].value * self.weight_layers[0][input_i] + neural_network_manager.bias);
+            self.activation_layers[0][input_i] = max(0., inputs[input_i].value * self.weight_layers[0][input_i] + neural_network_manager.bias);
             inputs[input_i].value;
             
             input_i += 1;
@@ -168,7 +168,7 @@ impl NeuralNetwork {
             let mut activation_index = 0;
             while activation_index < self.activation_layers[layer_i].len() {
 
-                self.activation_layers[layer_i][activation_index] = 0;
+                self.activation_layers[layer_i][activation_index] = 0.;
                 
                 let mut previous_layer_i = 0;
                 while previous_layer_i < self.activation_layers[(layer_i - 1) as usize].len() {
@@ -178,7 +178,7 @@ impl NeuralNetwork {
                     previous_layer_i += 1;
                 }
                 
-                self.activation_layers[layer_i][activation_index] = max(0, self.activation_layers[layer_i][activation_index] = neural_network_manager.bias);
+                self.activation_layers[layer_i][activation_index] = max(0., self.activation_layers[layer_i][activation_index] + neural_network_manager.bias);
 
                 activation_index += 1;
             }
@@ -215,6 +215,11 @@ impl NeuralNetwork {
             
             layer_i += 1;
         }
+    }
+
+    fn init_visuals(&mut self) {
+
+
     }
 
     fn visualize(&mut self) {
