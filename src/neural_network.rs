@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::{Mutex, MutexGuard};
 use std::cmp::max;
 extern crate rand;
@@ -5,8 +6,8 @@ extern crate rand;
 pub struct NeuralNetworkManager {
     id_index: i32,
     networks: Vec<( i32, NeuralNetwork )>,
-    bias: f32,
-    learning_rate: f32,
+    bias: usize,
+    learning_rate: usize,
     hidden_layers_count: usize,
     hidden_perceptron_count: usize,
 }
@@ -16,18 +17,18 @@ impl NeuralNetworkManager {
 
         return;
     }
-    pub fn new_id(&mut self) -> i32 {
+    pub fn new_id(&mut self) -> String {
         
         self.id_index += 1;
-        return self.id_index
+        return (&self.id_index).to_string()
     }
 }
 
 static neural_network_manager: MutexGuard<NeuralNetworkManager> = Mutex::new(NeuralNetworkManager {
     id_index: 1,
     networks: vec![],
-    bias: 1.,
-    learning_rate: 1.,
+    bias: 1,
+    learning_rate: 1,
     hidden_layers_count: 2,
     hidden_perceptron_count: 3,
 }).lock().unwrap();
@@ -51,13 +52,21 @@ neural_network_manager: NeuralNetworkManager = NeuralNetworkManager {
 
 pub struct NeuralNetwork {
     id: i32,
-    weight_layers: Vec<Vec<Vec<f32>>>,
-    activation_layers: Vec<Vec<f32>>,
+    weight_layers: Vec<Vec<Vec<usize>>>,
+    /**
+     * An ID reference to weights for a set of input perceptrons
+     */
+    input_weights: HashMap<String, usize>,
+    /**
+     * An array of IDs to find the input's weight
+     */
+    input_weight_layers: Vec<String>,
+    activation_layers: Vec<Vec<usize>>,
 }
 
 struct Input {
     name: String,
-    value: f32
+    value: usize
 }
 
 struct Output {
@@ -65,7 +74,7 @@ struct Output {
 }
 
 impl NeuralNetwork {
-    pub fn init(&mut self, weight_layers: Option<Vec<Vec<Vec<f32>>>>, activation_layers: Option<Vec<Vec<f32>>>) {
+    pub fn init(&mut self, weight_layers: Option<Vec<Vec<Vec<usize>>>>, activation_layers: Option<Vec<Vec<usize>>>) {
         /* self.id = NeuralNetworkManager::new_id(NeuralNetworkManager); */
 
         /* if let Some(self.weight_layers) { self.weight_layers = weight_layers }; */
@@ -76,7 +85,7 @@ impl NeuralNetwork {
         if let Some(activation_layers) = activation_layers {
             self.activation_layers = activation_layers
         }
-
+        
         return
     }
 
@@ -90,8 +99,8 @@ impl NeuralNetwork {
         let mut input_i = 0;
         while input_i < input_count {
 
-            self.weight_layers[input_i as usize].push(vec![input_i as f32]);
-            self.activation_layers[input_i as usize].push(input_i as f32);
+            self.weight_layers[input_i as usize].push(vec![input_i as usize]);
+            self.activation_layers[input_i as usize].push(input_i as usize);
 
             input_i += 1;
         }
@@ -112,12 +121,12 @@ impl NeuralNetwork {
                 let mut activation_i = 0;
                 while activation_i < self.activation_layers[(layer_i - 1) as usize].len() {
 
-                    self.weight_layers[layer_i as usize][perceptron_i as usize].push(0.);
+                    self.weight_layers[layer_i as usize][perceptron_i as usize].push(0);
 
                     activation_i += 1;
                 }
 
-                self.activation_layers[layer_i as usize].push(0.);
+                self.activation_layers[layer_i as usize].push(0);
 
                 perceptron_i += 1;
             }
@@ -138,12 +147,12 @@ impl NeuralNetwork {
             let mut activation_i = 0;
             while activation_i < self.activation_layers[last_layer_index - 1].len() {
 
-                self.weight_layers[last_layer_index][input_i].push(0.);
+                self.weight_layers[last_layer_index][input_i].push(0);
 
                 activation_i += 1;
             }
 
-            self.activation_layers[last_layer_index].push(0.);
+            self.activation_layers[last_layer_index].push(0);
 
             input_i += 1;
         }
@@ -154,7 +163,7 @@ impl NeuralNetwork {
         let mut input_i = 0;
         while input_i < inputs.len() {
 
-            self.activation_layers[0][input_i] = max(0., inputs[input_i].value * self.weight_layers[0][input_i] + neural_network_manager.bias);
+            self.activation_layers[0][input_i] = max(0, inputs[input_i].value * self.weight_layers[0][input_i] + neural_network_manager.bias);
             inputs[input_i].value;
             
             input_i += 1;
@@ -166,7 +175,7 @@ impl NeuralNetwork {
             let mut activation_index = 0;
             while activation_index < self.activation_layers[layer_i].len() {
 
-                self.activation_layers[layer_i][activation_index] = 0.;
+                self.activation_layers[layer_i][activation_index] = 0;
                 
                 let mut previous_layer_i = 0;
                 while previous_layer_i < self.activation_layers[(layer_i - 1) as usize].len() {
@@ -176,7 +185,7 @@ impl NeuralNetwork {
                     previous_layer_i += 1;
                 }
                 
-                self.activation_layers[layer_i][activation_index] = max(0., self.activation_layers[layer_i][activation_index] + neural_network_manager.bias);
+                self.activation_layers[layer_i][activation_index] = max(0, self.activation_layers[layer_i][activation_index] + neural_network_manager.bias);
 
                 activation_index += 1;
             }
@@ -204,7 +213,7 @@ impl NeuralNetwork {
                 
                 while weight_i < self.weight_layers[layer_i][activation_index].len() {
                  
-                    self.weight_layers[layer_i][activation_index][weight_i] += rng.gen::<f32>() * neural_network_manager.learning_rate - rng.gen::<f32>() * neural_network_manager.learning_rate;
+                    self.weight_layers[layer_i][activation_index][weight_i] += rng.gen::<usize>() * neural_network_manager.learning_rate - rng.gen::<usize>() * neural_network_manager.learning_rate;
                     weight_i += 1;
                 }
 
