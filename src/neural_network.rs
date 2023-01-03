@@ -1,6 +1,9 @@
+use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::sync::{Mutex, MutexGuard};
 use std::cmp::max;
+
+use rand::Rng;
 extern crate rand;
 
 pub struct NeuralNetworkManager {
@@ -13,7 +16,7 @@ pub struct NeuralNetworkManager {
 }
 
 impl NeuralNetworkManager {
-    pub fn init(&mut self) {
+    pub fn new(&mut self) {
 
         return;
     }
@@ -33,6 +36,12 @@ static neural_network_manager: MutexGuard<NeuralNetworkManager> = Mutex::new(Neu
     hidden_perceptron_count: 3,
 }).lock().unwrap();
 
+const BIAS = 1;
+const LEARNING_RATE = 1;
+const HIDDEN_LAYERS_COUNT = 2;
+const HIDDEN_PERCEPTRON_COUNT = 3;
+
+
 /* 
 static neural_network_manager: Mutex<NeuralNetworkManager> = NeuralNetworkManager {
     id_index: 1,
@@ -51,7 +60,7 @@ neural_network_manager: NeuralNetworkManager = NeuralNetworkManager {
  */
 
 pub struct NeuralNetwork {
-    id: i32,
+    id: String,
     weight_layers: Vec<Vec<Vec<usize>>>,
     /**
      * An ID reference to weights for a set of input perceptrons
@@ -64,20 +73,29 @@ pub struct NeuralNetwork {
     activation_layers: Vec<Vec<usize>>,
 }
 
-struct Input {
+pub struct Input {
     name: String,
-    value: usize
+    value: usize,
+    weightID: String,
 }
 
-struct Output {
+pub struct Output {
     name: String,
 }
 
 impl NeuralNetwork {
-    pub fn init(&mut self, weight_layers: Option<Vec<Vec<Vec<usize>>>>, activation_layers: Option<Vec<Vec<usize>>>) {
+    pub fn new(&mut self/* , weight_layers: Option<Vec<Vec<Vec<usize>>>>, activation_layers: Option<Vec<Vec<usize>>> */) {
+
+
+
         /* self.id = NeuralNetworkManager::new_id(NeuralNetworkManager); */
 
         /* if let Some(self.weight_layers) { self.weight_layers = weight_layers }; */
+/* 
+        if let Some(weight_layers) = weight_layers {
+            self.weight_layers = weight_layers;
+        };
+
         if let Some(weight_layers) = weight_layers {
             self.weight_layers = weight_layers;
         };
@@ -85,8 +103,7 @@ impl NeuralNetwork {
         if let Some(activation_layers) = activation_layers {
             self.activation_layers = activation_layers
         }
-        
-        return
+         */
     }
 
     fn build(&mut self, input_count: usize, output_count: usize) {
@@ -158,12 +175,15 @@ impl NeuralNetwork {
         }
     }
 
+    /**
+     * 
+     */
     fn forward_propagate(&mut self, inputs: Vec<Input>) {
 
         let mut input_i = 0;
         while input_i < inputs.len() {
 
-            self.activation_layers[0][input_i] = max(0, inputs[input_i].value * self.weight_layers[0][input_i] + neural_network_manager.bias);
+            self.activation_layers[0][input_i] = max(0, inputs[input_i].value * self.input_weights[&inputs[input_i].weightID] + neural_network_manager.bias);
             inputs[input_i].value;
             
             input_i += 1;
@@ -199,11 +219,32 @@ impl NeuralNetwork {
 
     }
 
-    fn mutate(&mut self) {
+    /**
+     * Randomly increases or decreases weights
+     */
+    fn mutate(&mut self, inputs: Vec<Input>) {
 
         let mut rng = rand::thread_rng();
 
-        let mut layer_i = 0;
+        // Input layer
+
+        let mut input_i = 0;
+        while input_i < self.input_weights.len() {
+
+            if input_i >= inputs.len() {
+
+                break;
+            };
+
+            let new_weight = self.input_weights[&inputs[input_i].weightID] + rng.gen::<usize>() * neural_network_manager.learning_rate - rng.gen::<usize>() * neural_network_manager.learning_rate;
+            self.input_weights.insert(inputs[input_i].weightID.clone(), new_weight);
+            
+            input_i += 1;
+        }
+
+        // Other layers
+
+        let mut layer_i = 1;
         while layer_i < self.activation_layers.len() {
 
             let mut activation_index = 0;
@@ -238,8 +279,10 @@ impl NeuralNetwork {
 
         return NeuralNetwork {
             id: neural_network_manager.new_id(),
-            weight_layers: self.weight_layers.to_vec(),
-            activation_layers: self.activation_layers.to_vec(),
+            input_weight_layers: self.input_weight_layers.clone(),
+            input_weights: self.input_weights.clone(),
+            weight_layers: self.weight_layers.clone(),
+            activation_layers: self.activation_layers.clone(),
         };
     }
 }
