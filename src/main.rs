@@ -2,28 +2,19 @@
 #![allow(dead_code)]
 
 mod neural_network;
-use neural_network::{NeuralNetwork, NeuralNetworkManager};
+use std::{vec, collections::HashMap, borrow::Borrow};
 
-use crate::neural_network::{Input, Output};
-
+use crate::neural_network::{Input, Output, NeuralNetwork,NEURAL_NETWORK_MANAGER};
+/* 
 static mut NEURAL_NETWORK_MANAGER: NeuralNetworkManager = NeuralNetworkManager {
     id_index: 1,
     networks: vec![],
-    bias: 1,
-    learning_rate: 1,
-    hidden_layers_count: 2,
-    hidden_perceptron_count: 3,
 };
-
+ */
 fn main() {
     println!("Hello, world!");
 
     /* let neural_network_manager = NeuralNetworkManager::new(); */
-
-
-}
-
-fn init() {
 
     let inputs: Vec<Input> = vec![
         Input {
@@ -42,11 +33,29 @@ fn init() {
             name: "result".to_string(),
         },
     ];
+
+    let mut neural_network = init(&inputs, outputs.len());
+    neural_network.forward_propagate(&inputs.to_vec());
+
 /* 
-    let neural_network = NeuralNetwork {
-        id: NeuralNetworkManager::new_id(),
-        ..Default::default()
+    for tuple in NEURAL_NETWORK_MANAGER.lock().unwrap().networks {
+
+        let neural_network = tuple.1;
+        neural_network.forward_propagate(&inputs);
     }
-    neural_network.init()
      */
+}
+
+fn init(inputs: &Vec<Input>, output_count: usize) -> NeuralNetwork {
+
+    let mut neural_network = NeuralNetwork {
+        id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
+        input_weights: HashMap::new(),
+        input_weight_layers: vec![],
+        weight_layers: vec![],
+        activation_layers: vec![],
+    };
+    neural_network.build(inputs, output_count);
+
+    return neural_network;
 }
