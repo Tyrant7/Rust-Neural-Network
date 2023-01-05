@@ -12,20 +12,20 @@ static mut NEURAL_NETWORK_MANAGER: NeuralNetworkManager = NeuralNetworkManager {
 };
  */
 fn main() {
-    println!("Hello, world!");
+    println!("Begin");
 
     /* let neural_network_manager = NeuralNetworkManager::new(); */
 
     let inputs: Vec<Input> = vec![
         Input {
             name: "x".to_string(),
-            value: 1,
-            weightID: "1".to_string(),
+            values: vec![1, 3],
+            weight_id: "1".to_string(),
         },
         Input {
             name: "y".to_string(),
-            value: 1,
-            weightID: "1".to_string(),
+            values: vec![2],
+            weight_id: "1".to_string(),
         },
     ];
     let outputs: Vec<Output> = vec![
@@ -35,7 +35,7 @@ fn main() {
     ];
 
     let mut neural_network = init(&inputs, outputs.len());
-    neural_network.forward_propagate(&inputs.to_vec());
+    neural_network.forward_propagate(&inputs);
 
 /* 
     for tuple in NEURAL_NETWORK_MANAGER.lock().unwrap().networks {
@@ -44,6 +44,7 @@ fn main() {
         neural_network.forward_propagate(&inputs);
     }
      */
+    println!("End");
 }
 
 fn init(inputs: &Vec<Input>, output_count: usize) -> NeuralNetwork {
