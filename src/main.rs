@@ -20,7 +20,7 @@ fn main() {
         Input {
             name: "x".to_string(),
             values: vec![1., 3.],
-            weight_id: "1".to_string(),
+            weight_id: vec!["1".to_string(), "2".to_string()],
         },
         Input {
             name: "y".to_string(),
