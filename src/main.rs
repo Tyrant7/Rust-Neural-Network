@@ -19,12 +19,12 @@ fn main() {
     let inputs: Vec<Input> = vec![
         Input {
             name: "x".to_string(),
-            values: vec![1, 3],
+            values: vec![1., 3.],
             weight_id: "1".to_string(),
         },
         Input {
             name: "y".to_string(),
-            values: vec![2],
+            values: vec![2.],
             weight_id: "1".to_string(),
         },
     ];
@@ -36,6 +36,7 @@ fn main() {
 
     let mut neural_network = init(&inputs, outputs.len());
     neural_network.forward_propagate(&inputs);
+    neural_network.mutate();
 
 /* 
     for tuple in NEURAL_NETWORK_MANAGER.lock().unwrap().networks {
