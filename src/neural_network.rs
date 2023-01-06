@@ -1,22 +1,25 @@
 use std::borrow::Borrow;
 use std::collections::HashMap;
-use std::ops::Index;
 use std::sync::{Mutex, MutexGuard};
 use std::cmp::max;
 
 use rand::Rng;
 extern crate rand;
 
+extern crate float_ord;
+use float_ord::FloatOrd;
+
 pub struct NeuralNetworkManager {
     id_index: i32,
-    pub networks: Vec<( i32, NeuralNetwork )>,
+    /* pub networks: HashMap<i32, NeuralNetwork>, */
 }
 
 impl NeuralNetworkManager {
-    pub fn new(&mut self) {
+/*     pub fn new(&mut self) {
 
-        return;
-    }
+        self.id_index = 0;
+
+    } */
     pub fn new_id(&mut self) -> String {
         
         self.id_index += 1;
@@ -26,7 +29,6 @@ impl NeuralNetworkManager {
 
 pub static NEURAL_NETWORK_MANAGER: Mutex<NeuralNetworkManager> = Mutex::new(NeuralNetworkManager {
     id_index: 1,
-    networks: vec![],
 })/* .unwrap() */;
 
 const BIAS: f32 = 1.;
@@ -62,6 +64,7 @@ pub struct Output {
     pub name: String,
 }
 
+#[derive(Clone)]
 pub struct NeuralNetwork {
     pub id: String,
     pub weight_layers: Vec<Vec<Vec<f32>>>,
@@ -99,7 +102,16 @@ impl NeuralNetwork {
 //          */
 //     }
 
+    // pub fn new(mut self) {
+
+    //     self.id = NEURAL_NETWORK_MANAGER.lock().unwrap().new_id();
+        
+    //     NEURAL_NETWORK_MANAGER.lock().unwrap().networks.insert(self.id.parse::<i32>().unwrap(), self);
+    //     return
+    // }
+
     pub fn build(&mut self, inputs: &Vec<Input>, output_count: usize) {
+
         println!("Build");
         self.weight_layers.push(vec![]);
         self.activation_layers.push(vec![]);
@@ -205,14 +217,13 @@ impl NeuralNetwork {
             let mut value_i = 0;
             while value_i < input.values.len() {
 
-                self.activation_layers[0][input_i] += max(0, (inputs[input_i].values[value_i] * self.weights_by_id[&inputs[input_i].weight_ids[value_i]]) as i32) as f32;
+                self.activation_layers[0][input_i] += self.relu(inputs[input_i].values[value_i] * self.weights_by_id[&inputs[input_i].weight_ids[value_i]]);
                 value_i += 1;
             }
 
             input_i += 1;
         }
-        println!("{:?}", self.activation_layers);
-        println!("A");
+
         //
         
         let mut layer_i = 1;
@@ -225,24 +236,28 @@ impl NeuralNetwork {
                 
                 let mut previous_layer_activation_i = 0;
                 while previous_layer_activation_i < self.activation_layers[(layer_i - 1) as usize].len() {
-                    println!("{:?}", self.activation_layers);
-                    println!("{}", layer_i);
-                    println!("{}", activation_i);
-                    println!("{}", previous_layer_activation_i);
+
                     self.activation_layers[layer_i][activation_i] += self.activation_layers[layer_i - 1][previous_layer_activation_i] * self.weight_layers[layer_i][activation_i][previous_layer_activation_i];
 
                     previous_layer_activation_i += 1;
                 }
                 
-                self.activation_layers[layer_i][activation_i] = max(0, self.activation_layers[layer_i][activation_i] as i32) as f32;
+                self.activation_layers[layer_i][activation_i] = self.relu(self.activation_layers[layer_i][activation_i]);
 
                 activation_i += 1;
             }
 
             layer_i += 1;
         }
-        print!("End of forward prop");
         println!("{:?}", self.activation_layers);
+    }
+
+    fn relu(&mut self, value: f32) -> f32 {
+
+        if value > 0. {
+            return value
+        }
+        return 0.
     }
 
     pub fn back_propagate(&mut self, scored_outputs: bool) {

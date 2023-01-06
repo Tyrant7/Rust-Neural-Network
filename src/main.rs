@@ -1,16 +1,18 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-mod neural_network;
-use std::{vec, collections::HashMap, borrow::Borrow};
+use std::{vec, collections::HashMap, borrow::Borrow, time::{Duration, Instant}};
 
+use eventual::Timer;
+extern crate eventual;
+
+use std::sync::mpsc::Sender;
+
+mod neural_network;
 use crate::neural_network::{Input, Output, NeuralNetwork,NEURAL_NETWORK_MANAGER};
-/* 
-static mut NEURAL_NETWORK_MANAGER: NeuralNetworkManager = NeuralNetworkManager {
-    id_index: 1,
-    networks: vec![],
-};
- */
+
+const TICK_SPEED: u32 = 10;
+
 fn main() {
     println!("Begin");
 
@@ -33,23 +35,15 @@ fn main() {
             name: "result".to_string(),
         },
     ];
-
+    
     let mut neural_network = init(&inputs, outputs.len());
-    neural_network.forward_propagate(&inputs);
-    neural_network.mutate();
-
-/* 
-    for tuple in NEURAL_NETWORK_MANAGER.lock().unwrap().networks {
-
-        let neural_network = tuple.1;
-        neural_network.forward_propagate(&inputs);
-    }
-     */
+    tick_manager(neural_network);
+    
     println!("End");
 }
 
-fn init(inputs: &Vec<Input>, output_count: usize) -> NeuralNetwork {
-
+pub fn init(inputs: &Vec<Input>, output_count: usize) -> NeuralNetwork {
+    
     let mut neural_network = NeuralNetwork {
         id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
         weights_by_id: HashMap::new(),
@@ -60,4 +54,47 @@ fn init(inputs: &Vec<Input>, output_count: usize) -> NeuralNetwork {
     neural_network.build(inputs, output_count);
 
     return neural_network;
+}
+
+pub fn tick_manager(mut neural_network: NeuralNetwork) {
+
+    let time_start = Instant::now();
+    let mut tick = 0;
+
+    let timer = Timer::new();
+    let ticks = timer.interval_ms(100).iter();
+    
+    for _ in ticks {
+
+        print!("Processing tick: ");
+        println!("{}", tick);
+
+        let time_elapsed = time_start.elapsed();
+        println!("{:?}", time_elapsed);
+
+        let inputs: Vec<Input> = vec![
+            Input {
+                name: "x".to_string(),
+                values: vec![1., 3.],
+                weight_ids: vec!["1".to_string(), "2".to_string()],
+            },
+            Input {
+                name: "y".to_string(),
+                values: vec![2.],
+                weight_ids: vec!["1".to_string()],
+            },
+        ];
+
+        neural_network.forward_propagate(&inputs);
+        println!("Test1");
+        if tick % 10 == 0 {
+
+            neural_network.mutate();
+        }
+        println!("Test2");
+
+        tick += 1;
+
+    }
+
 }
