@@ -110,7 +110,6 @@ impl NeuralNetwork {
         while input_i < inputs.len() {
 
             self.input_weight_layers.push(inputs[input_i].weight_ids.clone());
-            self.weights_by_id.insert(inputs[input_i].weight_ids.clone(), BIAS);
             
             self.weight_layers[0].push(vec![]);
             self.activation_layers[0].push(0.);
@@ -120,6 +119,7 @@ impl NeuralNetwork {
             let mut value_i = 0;
             while value_i < input.values.len() {
 
+                self.weights_by_id.insert(inputs[input_i].weight_ids[value_i].clone(), BIAS);
                 self.weight_layers[0][input_i].push(BIAS);
                 value_i += 1;
             }
@@ -258,28 +258,48 @@ impl NeuralNetwork {
         let mut rng = rand::thread_rng();
 
         // Input layer
-
+/* 
         let mut input_i = 0;
         while input_i < self.input_weight_layers.len() {
 
-            let weight_id = self.input_weight_layers[input_i].to_string();
-            let present_weight = self.weights_by_id.get(&weight_id).unwrap();
-            println!("{}", rng.gen_range(LEARNING_RATE * -1., LEARNING_RATE));
-            let new_weight = present_weight + rng.gen_range(LEARNING_RATE * -1., LEARNING_RATE);
-            
-            self.weights_by_id.insert(weight_id, new_weight);
+            let mut value_i = 0;
+            while value_i < self.input_weight_layers[input_i].len() {
+
+                let weight_id = self.input_weight_layers[input_i][value_i].to_string();
+                let present_weight = self.weights_by_id.get(&weight_id).unwrap();
+
+                let new_weight = present_weight + rng.gen_range(LEARNING_RATE * -1., LEARNING_RATE);
+                self.weights_by_id.insert(weight_id, new_weight);
+
+                value_i += 1;
+            }
 
             input_i += 1;
         }
+ */
+
+        // Mutate weights
+
+        for tuple in self.weights_by_id.clone() {
+
+            let new_weight = tuple.1 + rng.gen_range(LEARNING_RATE * -1., LEARNING_RATE);
+            self.weights_by_id.insert(tuple.0, new_weight);
+        }
+
+        // Construct new weight layers
 
         let mut input_i = 0;
         while input_i < self.input_weight_layers.len() {
-            let mut weight_i = 0;
+
+            let mut value_i = 0;
+            while value_i < self.input_weight_layers[input_i].len() {
+
+                let weight_id = self.input_weight_layers[input_i][value_i].to_string();
+                let present_weight = self.weights_by_id.get(&weight_id).unwrap();
                 
-            while weight_i < self.weight_layers[0][input_i].len() {
-                
-                self.weight_layers[0][input_i][weight_i] = 
-                weight_i += 1;
+                self.weight_layers[0][input_i][value_i] = present_weight.clone();
+
+                value_i += 1;
             }
 
             input_i += 1;
@@ -296,7 +316,7 @@ impl NeuralNetwork {
                 let mut weight_i = 0;
                 
                 while weight_i < self.weight_layers[layer_i][activation_index].len() {
-                    println!("{}", rng.gen_range(LEARNING_RATE * -1., LEARNING_RATE));
+
                     self.weight_layers[layer_i][activation_index][weight_i] += rng.gen_range(LEARNING_RATE * -1., LEARNING_RATE);
                     weight_i += 1;
                 }

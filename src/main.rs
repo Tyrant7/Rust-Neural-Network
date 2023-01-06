@@ -20,12 +20,12 @@ fn main() {
         Input {
             name: "x".to_string(),
             values: vec![1., 3.],
-            weight_id: vec!["1".to_string(), "2".to_string()],
+            weight_ids: vec!["1".to_string(), "2".to_string()],
         },
         Input {
             name: "y".to_string(),
             values: vec![2.],
-            weight_id: "1".to_string(),
+            weight_ids: vec!["1".to_string()],
         },
     ];
     let outputs: Vec<Output> = vec![
@@ -52,7 +52,7 @@ fn init(inputs: &Vec<Input>, output_count: usize) -> NeuralNetwork {
 
     let mut neural_network = NeuralNetwork {
         id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
-        input_weights: HashMap::new(),
+        weights_by_id: HashMap::new(),
         input_weight_layers: vec![],
         weight_layers: vec![],
         activation_layers: vec![],
