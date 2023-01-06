@@ -66,6 +66,10 @@ pub fn tick_manager(mut neural_network: NeuralNetwork) {
     
     for _ in ticks {
 
+        if tick > 500 {
+            break;
+        }
+
         print!("Processing tick: ");
         println!("{}", tick);
 
@@ -86,12 +90,11 @@ pub fn tick_manager(mut neural_network: NeuralNetwork) {
         ];
 
         neural_network.forward_propagate(&inputs);
-        println!("Test1");
-        if tick % 10 == 0 {
+
+        if tick % 1 == 0 {
 
             neural_network.mutate();
         }
-        println!("Test2");
 
         tick += 1;
 
