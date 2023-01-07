@@ -19,21 +19,19 @@ fn main() {
     /* let neural_network_manager = NeuralNetworkManager::new(); */
 
     let inputs: Vec<Input> = vec![
-        Input {
-            name: "x".to_string(),
-            values: vec![1., 3.],
-            weight_ids: vec!["1".to_string(), "2".to_string()],
-        },
-        Input {
-            name: "y".to_string(),
-            values: vec![2.],
-            weight_ids: vec!["1".to_string()],
-        },
+        Input::new(
+            "x".to_string(),
+            vec![1., 3.],
+            vec!["1".to_string(), "2".to_string()],
+        ),
+        Input::new(
+            "y".to_string(),
+            vec![2.],
+            vec!["1".to_string()],
+        ),
     ];
     let outputs: Vec<Output> = vec![
-        Output {
-            name: "result".to_string(),
-        },
+        Output::new("result".to_string()),
     ];
     
     let mut neural_network = init(&inputs, outputs.len());
@@ -44,13 +42,7 @@ fn main() {
 
 pub fn init(inputs: &Vec<Input>, output_count: usize) -> NeuralNetwork {
     
-    let mut neural_network = NeuralNetwork {
-        id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
-        weights_by_id: HashMap::new(),
-        input_weight_layers: vec![],
-        weight_layers: vec![],
-        activation_layers: vec![],
-    };
+    let mut neural_network = NeuralNetwork::new();
     neural_network.build(inputs, output_count);
 
     return neural_network;

@@ -15,11 +15,12 @@ pub struct NeuralNetworkManager {
 }
 
 impl NeuralNetworkManager {
-/*     pub fn new(&mut self) {
+    pub fn new() -> Self {
 
-        self.id_index = 0;
-
-    } */
+        return NeuralNetworkManager { 
+            id_index: 0 
+        }
+    }
     pub fn new_id(&mut self) -> String {
         
         self.id_index += 1;
@@ -60,8 +61,28 @@ pub struct Input {
     pub weight_ids: Vec<String>,
 }
 
+impl Input {
+    pub fn new(name: String, values: Vec<f32>, weight_ids: Vec<String>) -> Self {
+
+        return Input { 
+            name, 
+            values, 
+            weight_ids,
+        }
+    }
+}
+
 pub struct Output {
     pub name: String,
+}
+
+impl Output {
+    pub fn new(name: String) -> Self {
+
+        return Output {
+            name,
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -102,13 +123,20 @@ impl NeuralNetwork {
 //          */
 //     }
 
-    // pub fn new(mut self) {
-
-    //     self.id = NEURAL_NETWORK_MANAGER.lock().unwrap().new_id();
+    pub fn new() -> Self {
+/* 
+        self.id = NEURAL_NETWORK_MANAGER.lock().unwrap().new_id();
         
-    //     NEURAL_NETWORK_MANAGER.lock().unwrap().networks.insert(self.id.parse::<i32>().unwrap(), self);
-    //     return
-    // }
+        NEURAL_NETWORK_MANAGER.lock().unwrap().networks.insert(self.id.parse::<i32>().unwrap(), self);
+ */
+        return NeuralNetwork {
+            id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
+            input_weight_layers: vec![],
+            weights_by_id: HashMap::new(),
+            weight_layers: vec![],
+            activation_layers: vec![],
+        }
+    }
 
     pub fn build(&mut self, inputs: &Vec<Input>, output_count: usize) {
 
