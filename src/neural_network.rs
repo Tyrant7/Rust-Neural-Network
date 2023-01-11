@@ -17,7 +17,7 @@ pub struct NeuralNetworkManager {
 impl NeuralNetworkManager {
     pub fn new() -> Self {
 
-        return NeuralNetworkManager { 
+        return Self { 
             id_index: 0 
         }
     }
