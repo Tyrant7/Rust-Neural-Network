@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::sync::Mutex;
+use std::fs;
 
 use rand::Rng;
 extern crate rand;
@@ -341,6 +342,18 @@ impl NeuralNetwork {
             layer_i += 1;
         }
         println!("{:?}", self.weight_layers);
+    }
+
+    pub fn write_to_file(&self) {
+        println!("Write to file");
+
+        self.write_weights();
+    }
+
+    pub fn write_weights(&self) {
+        fs::write("weights_by_id.txt", format!("{:?}", self.weights_by_id)).expect("Unable to write weights by id");
+
+        fs::write("weight_layers.txt", format!("{:?}", self.weight_layers)).expect("Unable to write weight layers");
     }
 
     pub fn init_visuals(&mut self) {}

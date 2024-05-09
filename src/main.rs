@@ -11,7 +11,7 @@ use std::sync::mpsc::Sender;
 mod neural_network;
 use crate::neural_network::{Input, Output, NeuralNetwork,NEURAL_NETWORK_MANAGER};
 
-const TICK_SPEED: u32 = 10;
+const TICK_SPEED: u32 = 100;
 
 fn main() {
     println!("Begin");
@@ -54,7 +54,7 @@ pub fn tick_manager(mut neural_network: NeuralNetwork) {
     let mut tick = 0;
 
     let timer = Timer::new();
-    let ticks = timer.interval_ms(100).iter();
+    let ticks = timer.interval_ms(TICK_SPEED).iter();
     
     for _ in ticks {
 
@@ -86,6 +86,7 @@ pub fn tick_manager(mut neural_network: NeuralNetwork) {
         if tick % 1 == 0 {
 
             neural_network.mutate();
+            neural_network.write_to_file();
         }
 
         tick += 1;
