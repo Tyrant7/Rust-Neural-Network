@@ -1,5 +1,8 @@
 [package]
-name = "rust-neural-network"
+name = "rust_neural_network"
+authors = ["Carson Burke <carsonburke22@gmail.com>"]
+description = "Rust Neural Network"
+license = "MIT"
 version = "0.1.0"
 edition = "2021"
 

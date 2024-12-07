@@ -106,7 +106,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rust-neural-network"
+name = "rust_neural_network"
 version = "0.1.0"
 dependencies = [
  "float-ord",
