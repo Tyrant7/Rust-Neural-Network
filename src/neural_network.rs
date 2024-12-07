@@ -135,7 +135,9 @@ impl NeuralNetwork {
     }
 
     pub fn build(&mut self, inputs: &[Input], output_count: usize) {
+        #[cfg(feature = "debug_network")]
         println!("Build");
+
         self.weight_layers.push(vec![]);
         self.activation_layers.push(vec![]);
 
@@ -211,6 +213,7 @@ impl NeuralNetwork {
             output_i += 1;
         }
 
+        #[cfg(feature = "debug_network")]
         println!("{:?}", self.activation_layers);
     }
 
@@ -218,6 +221,7 @@ impl NeuralNetwork {
      *
      */
     pub fn forward_propagate(&mut self, inputs: &[Input]) {
+        #[cfg(feature = "debug_network")]
         println!("Foward prop");
 
         let mut activation_i = 0;
@@ -269,6 +273,8 @@ impl NeuralNetwork {
 
             layer_i += 1;
         }
+
+        #[cfg(feature = "debug_network")]
         println!("{:?}", self.activation_layers);
     }
 
@@ -282,7 +288,9 @@ impl NeuralNetwork {
      * Randomly increases or decreases weights
      */
     pub fn mutate(&mut self) {
+        #[cfg(feature = "debug_network")]
         println!("Mutate");
+
         let mut rng = rand::thread_rng();
 
         // Input layer
@@ -354,10 +362,13 @@ impl NeuralNetwork {
 
             layer_i += 1;
         }
+
+        #[cfg(feature = "debug_network")]
         println!("{:?}", self.weight_layers);
     }
 
     pub fn write_to_file(&self) {
+        #[cfg(feature = "debug_network")]
         println!("Write to file");
 
         self.write_weights();
