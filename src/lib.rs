@@ -7,7 +7,7 @@ use neural_network::{InputName, OutputName};
 
 use std::sync::mpsc::Sender;
 
-mod neural_network;
+pub mod neural_network;
 use crate::neural_network::{Input, Output, NeuralNetwork,NEURAL_NETWORK_MANAGER};
 
 const TICK_SPEED: u32 = 1;
