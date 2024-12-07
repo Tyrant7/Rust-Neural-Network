@@ -1,22 +1,22 @@
 use std::collections::HashMap;
-use std::sync::Mutex;
 use std::fs;
+use std::sync::Mutex;
 
 use rand::Rng;
 extern crate rand;
 
 pub struct NeuralNetworkManager {
-    id_index: i32,
+    id_index: u32,
     /* pub networks: HashMap<i32, NeuralNetwork>, */
 }
 
 impl NeuralNetworkManager {
     pub fn new() -> Self {
-        return Self { id_index: 0 };
+        Self { id_index: 0 }
     }
-    pub fn new_id(&mut self) -> String {
+    pub fn new_id(&mut self) -> u32 {
         self.id_index += 1;
-        return (&self.id_index).to_string();
+        self.id_index
     }
 }
 
@@ -24,8 +24,8 @@ pub static NEURAL_NETWORK_MANAGER: Mutex<NeuralNetworkManager> = Mutex::new(Neur
     id_index: 1,
 })/* .unwrap() */;
 
-const BIAS: f32 = 1.;
-const LEARNING_RATE: f32 = 1.;
+const BIAS: f64 = 1.;
+const LEARNING_RATE: f64 = 1.;
 const HIDDEN_LAYERS_COUNT: i32 = 1;
 const HIDDEN_PERCEPTRON_COUNT: i32 = 2;
 
@@ -46,46 +46,57 @@ neural_network_manager: NeuralNetworkManager = NeuralNetworkManager {
 };
  */
 
+#[derive(Copy, Clone)]
+pub enum InputName {
+    X,
+    Y,
+}
+
+#[derive(Copy, Clone)]
+pub enum OutputName {
+    Result,
+}
+
 #[derive(Clone)]
 pub struct Input {
-    pub name: String,
-    pub values: Vec<f32>,
-    pub weight_ids: Vec<String>,
+    pub name: InputName,
+    pub values: Vec<f64>,
+    pub weight_ids: Vec<u32>,
 }
 
 impl Input {
-    pub fn new(name: String, values: Vec<f32>, weight_ids: Vec<String>) -> Self {
-        return Input {
+    pub fn new(name: InputName, values: Vec<f64>, weight_ids: Vec<u32>) -> Self {
+        Input {
             name,
             values,
             weight_ids,
-        };
+        }
     }
 }
 
 pub struct Output {
-    pub name: String,
+    pub name: OutputName,
 }
 
 impl Output {
-    pub fn new(name: String) -> Self {
-        return Output { name };
+    pub fn new(name: OutputName) -> Self {
+        Output { name }
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct NeuralNetwork {
-    pub id: String,
-    pub weight_layers: Vec<Vec<Vec<f32>>>,
+    pub id: u32,
+    pub weight_layers: Vec<Vec<Vec<f64>>>,
     /**
      * An ID reference to weights for a set of input perceptrons
      */
-    pub weights_by_id: HashMap<String, f32>,
+    pub weights_by_id: HashMap<u32, f64>,
     /**
      * An input perceptron by input value weight of ids to find the input's weight
      */
-    pub input_weight_layers: Vec<Vec<String>>,
-    pub activation_layers: Vec<Vec<f32>>,
+    pub input_weight_layers: Vec<Vec<u32>>,
+    pub activation_layers: Vec<Vec<f64>>,
 }
 
 impl NeuralNetwork {
@@ -114,16 +125,16 @@ impl NeuralNetwork {
 
                NEURAL_NETWORK_MANAGER.lock().unwrap().networks.insert(self.id.parse::<i32>().unwrap(), self);
         */
-        return NeuralNetwork {
+        NeuralNetwork {
             id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
             input_weight_layers: vec![],
             weights_by_id: HashMap::new(),
             weight_layers: vec![],
             activation_layers: vec![],
-        };
+        }
     }
 
-    pub fn build(&mut self, inputs: &Vec<Input>, output_count: usize) {
+    pub fn build(&mut self, inputs: &[Input], output_count: usize) {
         println!("Build");
         self.weight_layers.push(vec![]);
         self.activation_layers.push(vec![]);
@@ -143,7 +154,7 @@ impl NeuralNetwork {
             let mut value_i = 0;
             while value_i < input.values.len() {
                 self.weights_by_id
-                    .insert(inputs[input_i].weight_ids[value_i].clone(), BIAS);
+                    .insert(inputs[input_i].weight_ids[value_i], BIAS);
                 self.weight_layers[0][input_i].push(BIAS);
                 value_i += 1;
             }
@@ -206,7 +217,7 @@ impl NeuralNetwork {
     /**
      *
      */
-    pub fn forward_propagate(&mut self, inputs: &Vec<Input>) {
+    pub fn forward_propagate(&mut self, inputs: &[Input]) {
         println!("Foward prop");
 
         let mut activation_i = 0;
@@ -241,7 +252,7 @@ impl NeuralNetwork {
 
                 let mut previous_layer_activation_i = 0;
                 while previous_layer_activation_i
-                    < self.activation_layers[(layer_i - 1) as usize].len()
+                    < self.activation_layers[(layer_i - 1)].len()
                 {
                     self.activation_layers[layer_i][activation_i] += self.activation_layers
                         [layer_i - 1][previous_layer_activation_i]
@@ -261,11 +272,8 @@ impl NeuralNetwork {
         println!("{:?}", self.activation_layers);
     }
 
-    fn relu(&mut self, value: f32) -> f32 {
-        if value > 0. {
-            return value;
-        }
-        return 0.;
+    fn relu(&mut self, value: f64) -> f64 {
+        value.max(0.)
     }
 
     pub fn back_propagate(&mut self, scored_outputs: bool) {}
@@ -300,9 +308,14 @@ impl NeuralNetwork {
 
         // Mutate weights
 
-        for tuple in self.weights_by_id.clone() {
-            let new_weight = tuple.1 + rng.gen_range(LEARNING_RATE * -1., LEARNING_RATE);
-            self.weights_by_id.insert(tuple.0, new_weight);
+        // for tuple in self.weights_by_id.iter() {
+        //     let new_weight = tuple.1 + rng.gen_range(LEARNING_RATE * -1., LEARNING_RATE);
+        //     self.weights_by_id.insert(*tuple.0, new_weight);
+        // }
+
+        // Not 100% sure this works
+        for tuple in self.weights_by_id.iter_mut() {
+            *tuple.1 += rng.gen_range(LEARNING_RATE * -1., LEARNING_RATE);
         }
 
         // Construct new weight layers
@@ -311,10 +324,10 @@ impl NeuralNetwork {
         while input_i < self.input_weight_layers.len() {
             let mut value_i = 0;
             while value_i < self.input_weight_layers[input_i].len() {
-                let weight_id = self.input_weight_layers[input_i][value_i].to_string();
+                let weight_id = self.input_weight_layers[input_i][value_i];
                 let present_weight = self.weights_by_id.get(&weight_id).unwrap();
 
-                self.weight_layers[0][input_i][value_i] = present_weight.clone();
+                self.weight_layers[0][input_i][value_i] = *present_weight;
 
                 value_i += 1;
             }
@@ -351,9 +364,11 @@ impl NeuralNetwork {
     }
 
     pub fn write_weights(&self) {
-        fs::write("weights_by_id.txt", format!("{:?}", self.weights_by_id)).expect("Unable to write weights by id");
+        fs::write("weights_by_id.txt", format!("{:?}", self.weights_by_id))
+            .expect("Unable to write weights by id");
 
-        fs::write("weight_layers.txt", format!("{:?}", self.weight_layers)).expect("Unable to write weight layers");
+        fs::write("weight_layers.txt", format!("{:?}", self.weight_layers))
+            .expect("Unable to write weight layers");
     }
 
     pub fn init_visuals(&mut self) {}
@@ -361,15 +376,12 @@ impl NeuralNetwork {
     pub fn update_visuals(&mut self) {}
 
     pub unsafe fn clone(&self) -> NeuralNetwork {
-        let new_neural_network = NeuralNetwork {
+        NeuralNetwork {
             id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
             input_weight_layers: self.input_weight_layers.clone(),
             weights_by_id: self.weights_by_id.clone(),
             weight_layers: self.weight_layers.clone(),
             activation_layers: self.activation_layers.clone(),
-        };
-        /* new_neural_network.new(); */
-
-        return new_neural_network;
+        }
     }
 }
