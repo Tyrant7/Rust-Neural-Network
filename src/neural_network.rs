@@ -134,7 +134,7 @@ impl NeuralNetwork {
         }
     }
 
-    pub fn build(&mut self, inputs: &[Input], output_count: usize) {
+    pub fn build(&mut self, inputs: &[Input], output_count: usize) -> &mut Self {
         #[cfg(feature = "debug_network")]
         println!("Build");
 
@@ -215,6 +215,8 @@ impl NeuralNetwork {
 
         #[cfg(feature = "debug_network")]
         println!("{:?}", self.activation_layers);
+
+        self
     }
 
     /**
