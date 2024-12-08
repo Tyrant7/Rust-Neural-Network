@@ -84,7 +84,7 @@ impl Output {
     }
 }
 
-#[derive(Clone, Default)]
+#[derive(Default)]
 pub struct NeuralNetwork {
     pub id: u32,
     pub weight_layers: Vec<Vec<Vec<f64>>>,
@@ -387,8 +387,10 @@ impl NeuralNetwork {
     pub fn init_visuals(&mut self) {}
 
     pub fn update_visuals(&mut self) {}
+}
 
-    pub unsafe fn clone(&self) -> NeuralNetwork {
+impl Clone for NeuralNetwork {
+    fn clone(&self) -> NeuralNetwork {
         NeuralNetwork {
             id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
             input_weight_layers: self.input_weight_layers.clone(),
