@@ -24,11 +24,6 @@ pub static NEURAL_NETWORK_MANAGER: Mutex<NeuralNetworkManager> = Mutex::new(Neur
     id_index: 1,
 })/* .unwrap() */;
 
-const BIAS: f64 = 1.;
-const LEARNING_RATE: f64 = 1.;
-const HIDDEN_LAYERS_COUNT: i32 = 1;
-const HIDDEN_PERCEPTRON_COUNT: i32 = 2;
-
 /*
 static neural_network_manager: Mutex<NeuralNetworkManager> = NeuralNetworkManager {
     id_index: 1,
@@ -84,9 +79,12 @@ impl Output {
     }
 }
 
-#[derive(Default)]
 pub struct NeuralNetwork {
     pub id: u32,
+    pub bias: f64,
+    pub learning_rate: f64,
+    pub hidden_layers_count: u32,
+    pub hidden_perceptron_count: u32,
     pub weight_layers: Vec<Vec<Vec<f64>>>,
     /**
      * An ID reference to weights for a set of input perceptrons
@@ -97,6 +95,24 @@ pub struct NeuralNetwork {
      */
     pub input_weight_layers: Vec<Vec<u32>>,
     pub activation_layers: Vec<Vec<f64>>,
+}
+
+impl Default for NeuralNetwork {
+    fn default() -> Self {
+        Self {
+            // config
+            bias: 0.,
+            learning_rate: 0.1,
+            hidden_layers_count: 2,
+            hidden_perceptron_count: 10,
+            //
+            id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
+            input_weight_layers: vec![],
+            weights_by_id: HashMap::new(),
+            weight_layers: vec![],
+            activation_layers: vec![],
+        }
+    }
 }
 
 impl NeuralNetwork {
@@ -119,18 +135,18 @@ impl NeuralNetwork {
     //          */
     //     }
 
-    pub fn new() -> Self {
-        /*
-               self.id = NEURAL_NETWORK_MANAGER.lock().unwrap().new_id();
-
-               NEURAL_NETWORK_MANAGER.lock().unwrap().networks.insert(self.id.parse::<i32>().unwrap(), self);
-        */
-        NeuralNetwork {
-            id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
-            input_weight_layers: vec![],
-            weights_by_id: HashMap::new(),
-            weight_layers: vec![],
-            activation_layers: vec![],
+    pub fn new(
+        bias: f64,
+        learning_rate: f64,
+        hidden_layers_count: u32,
+        hidden_perceptron_count: u32,
+    ) -> Self {
+        Self {
+            bias,
+            learning_rate,
+            hidden_layers_count,
+            hidden_perceptron_count,
+            ..Default::default()
         }
     }
 
@@ -156,8 +172,8 @@ impl NeuralNetwork {
             let mut value_i = 0;
             while value_i < input.values.len() {
                 self.weights_by_id
-                    .insert(inputs[input_i].weight_ids[value_i], BIAS);
-                self.weight_layers[0][input_i].push(BIAS);
+                    .insert(inputs[input_i].weight_ids[value_i], self.bias);
+                self.weight_layers[0][input_i].push(self.bias);
                 value_i += 1;
             }
 
@@ -167,17 +183,17 @@ impl NeuralNetwork {
         // Construct hidden layers
 
         let mut layer_i = 1;
-        while layer_i < HIDDEN_LAYERS_COUNT + 1 {
+        while layer_i < self.hidden_layers_count + 1 {
             self.weight_layers.push(vec![]);
             self.activation_layers.push(vec![]);
 
             let mut perceptron_i = 0;
-            while perceptron_i < HIDDEN_PERCEPTRON_COUNT {
+            while perceptron_i < self.hidden_layers_count {
                 self.weight_layers[layer_i as usize].push(vec![]);
 
                 let mut activation_i = 0;
                 while activation_i < self.activation_layers[(layer_i - 1) as usize].len() {
-                    self.weight_layers[layer_i as usize][perceptron_i as usize].push(BIAS);
+                    self.weight_layers[layer_i as usize][perceptron_i as usize].push(self.bias);
 
                     activation_i += 1;
                 }
@@ -203,7 +219,7 @@ impl NeuralNetwork {
 
             let mut activation_i = 0;
             while activation_i < self.activation_layers[last_layer_index - 1].len() {
-                self.weight_layers[last_layer_index][output_i].push(BIAS);
+                self.weight_layers[last_layer_index][output_i].push(self.bias);
 
                 activation_i += 1;
             }
@@ -257,9 +273,7 @@ impl NeuralNetwork {
                 self.activation_layers[layer_i][activation_i] = 0.;
 
                 let mut previous_layer_activation_i = 0;
-                while previous_layer_activation_i
-                    < self.activation_layers[(layer_i - 1)].len()
-                {
+                while previous_layer_activation_i < self.activation_layers[(layer_i - 1)].len() {
                     self.activation_layers[layer_i][activation_i] += self.activation_layers
                         [layer_i - 1][previous_layer_activation_i]
                         * self.weight_layers[layer_i][activation_i][previous_layer_activation_i];
@@ -325,7 +339,7 @@ impl NeuralNetwork {
 
         // Not 100% sure this works
         for tuple in self.weights_by_id.iter_mut() {
-            *tuple.1 += rng.gen_range(LEARNING_RATE * -1., LEARNING_RATE);
+            *tuple.1 += rng.gen_range(-self.learning_rate, self.learning_rate);
         }
 
         // Construct new weight layers
@@ -355,7 +369,7 @@ impl NeuralNetwork {
 
                 while weight_i < self.weight_layers[layer_i][activation_index].len() {
                     self.weight_layers[layer_i][activation_index][weight_i] +=
-                        rng.gen_range(LEARNING_RATE * -1., LEARNING_RATE);
+                        rng.gen_range(-self.learning_rate, self.learning_rate);
                     weight_i += 1;
                 }
 
@@ -392,6 +406,10 @@ impl NeuralNetwork {
 impl Clone for NeuralNetwork {
     fn clone(&self) -> NeuralNetwork {
         NeuralNetwork {
+            bias: self.bias,
+            learning_rate: self.learning_rate,
+            hidden_layers_count: self.hidden_layers_count,
+            hidden_perceptron_count: self.hidden_perceptron_count,
             id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
             input_weight_layers: self.input_weight_layers.clone(),
             weights_by_id: self.weights_by_id.clone(),

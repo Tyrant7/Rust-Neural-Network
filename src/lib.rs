@@ -41,7 +41,7 @@ fn main() {
 
 pub fn init(inputs: &Vec<Input>, output_count: usize) -> NeuralNetwork {
     
-    let mut neural_network = NeuralNetwork::new();
+    let mut neural_network = NeuralNetwork::default();
     neural_network.build(inputs, output_count);
 
     neural_network
