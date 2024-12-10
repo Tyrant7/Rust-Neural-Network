@@ -159,8 +159,7 @@ impl NeuralNetwork {
 
         // Construct the input layer
 
-        let mut input_i = 0;
-        while input_i < inputs.len() {
+        for input_i in 0..inputs.len() {
             self.input_weight_layers
                 .push(inputs[input_i].weight_ids.clone());
 
@@ -169,41 +168,28 @@ impl NeuralNetwork {
 
             let input = &inputs[input_i];
 
-            let mut value_i = 0;
-            while value_i < input.values.len() {
+            for value_i in 0..input.values.len() {
                 self.weights_by_id
                     .insert(inputs[input_i].weight_ids[value_i], self.bias);
                 self.weight_layers[0][input_i].push(self.bias);
-                value_i += 1;
             }
-
-            input_i += 1;
         }
 
         // Construct hidden layers
 
-        let mut layer_i = 1;
-        while layer_i < self.hidden_layers_count + 1 {
+        for layer_i in 1..self.hidden_layers_count + 1 {
             self.weight_layers.push(vec![]);
             self.activation_layers.push(vec![]);
 
-            let mut perceptron_i = 0;
-            while perceptron_i < self.hidden_layers_count {
+            for perceptron_i in 0..self.hidden_layers_count {
                 self.weight_layers[layer_i as usize].push(vec![]);
 
-                let mut activation_i = 0;
-                while activation_i < self.activation_layers[(layer_i - 1) as usize].len() {
+                for _ in 0..self.activation_layers[(layer_i - 1) as usize].len() {
                     self.weight_layers[layer_i as usize][perceptron_i as usize].push(self.bias);
-
-                    activation_i += 1;
                 }
 
                 self.activation_layers[layer_i as usize].push(0.);
-
-                perceptron_i += 1;
             }
-
-            layer_i += 1;
         }
 
         // Output layers
@@ -213,20 +199,14 @@ impl NeuralNetwork {
 
         let last_layer_index = self.activation_layers.len() - 1;
 
-        let mut output_i = 0;
-        while output_i < output_count {
+        for output_i in 0..output_count {
             self.weight_layers[last_layer_index].push(vec![]);
 
-            let mut activation_i = 0;
-            while activation_i < self.activation_layers[last_layer_index - 1].len() {
+            for _ in 0..self.activation_layers[last_layer_index - 1].len() {
                 self.weight_layers[last_layer_index][output_i].push(self.bias);
-
-                activation_i += 1;
             }
 
             self.activation_layers[last_layer_index].push(0.);
-
-            output_i += 1;
         }
 
         #[cfg(feature = "debug_network")]
@@ -242,52 +222,36 @@ impl NeuralNetwork {
         #[cfg(feature = "debug_network")]
         println!("Foward prop");
 
-        let mut activation_i = 0;
-        while activation_i < self.activation_layers[0].len() {
+        // Input layers
+
+        for activation_i in 0..self.activation_layers[0].len() {
             self.activation_layers[0][activation_i] = 0.;
-            activation_i += 1;
         }
 
-        let mut input_i = 0;
-        while input_i < inputs.len() {
-            let input = &inputs[input_i];
-
-            let mut value_i = 0;
-            while value_i < input.values.len() {
+        for (input_i, input) in inputs.iter().enumerate() {
+            for value_i in 0..input.values.len() {
                 self.activation_layers[0][input_i] += self.relu(
                     inputs[input_i].values[value_i]
                         * self.weights_by_id[&inputs[input_i].weight_ids[value_i]],
                 );
-                value_i += 1;
             }
-
-            input_i += 1;
         }
 
-        //
+        // Other layers
 
-        let mut layer_i = 1;
-        while layer_i < self.activation_layers.len() {
-            activation_i = 0;
-            while activation_i < self.activation_layers[layer_i].len() {
+        for layer_i in 1..self.activation_layers.len() {
+            for activation_i in 0..self.activation_layers[layer_i].len() {
                 self.activation_layers[layer_i][activation_i] = 0.;
 
-                let mut previous_layer_activation_i = 0;
-                while previous_layer_activation_i < self.activation_layers[(layer_i - 1)].len() {
+                for previous_layer_activation_i in 0..self.activation_layers[(layer_i - 1)].len() {
                     self.activation_layers[layer_i][activation_i] += self.activation_layers
                         [layer_i - 1][previous_layer_activation_i]
                         * self.weight_layers[layer_i][activation_i][previous_layer_activation_i];
-
-                    previous_layer_activation_i += 1;
                 }
 
                 self.activation_layers[layer_i][activation_i] =
                     self.relu(self.activation_layers[layer_i][activation_i]);
-
-                activation_i += 1;
             }
-
-            layer_i += 1;
         }
 
         #[cfg(feature = "debug_network")]
@@ -310,32 +274,8 @@ impl NeuralNetwork {
         let mut rng = rand::thread_rng();
 
         // Input layer
-        /*
-               let mut input_i = 0;
-               while input_i < self.input_weight_layers.len() {
-
-                   let mut value_i = 0;
-                   while value_i < self.input_weight_layers[input_i].len() {
-
-                       let weight_id = self.input_weight_layers[input_i][value_i].to_string();
-                       let present_weight = self.weights_by_id.get(&weight_id).unwrap();
-
-                       let new_weight = present_weight + rng.gen_range(LEARNING_RATE * -1., LEARNING_RATE);
-                       self.weights_by_id.insert(weight_id, new_weight);
-
-                       value_i += 1;
-                   }
-
-                   input_i += 1;
-               }
-        */
 
         // Mutate weights
-
-        // for tuple in self.weights_by_id.iter() {
-        //     let new_weight = tuple.1 + rng.gen_range(LEARNING_RATE * -1., LEARNING_RATE);
-        //     self.weights_by_id.insert(*tuple.0, new_weight);
-        // }
 
         // Not 100% sure this works
         for tuple in self.weights_by_id.iter_mut() {
@@ -344,39 +284,24 @@ impl NeuralNetwork {
 
         // Construct new weight layers
 
-        let mut input_i = 0;
-        while input_i < self.input_weight_layers.len() {
-            let mut value_i = 0;
-            while value_i < self.input_weight_layers[input_i].len() {
+        for input_i in 0..self.input_weight_layers.len() {
+            for value_i in 0..self.input_weight_layers[input_i].len() {
                 let weight_id = self.input_weight_layers[input_i][value_i];
                 let present_weight = self.weights_by_id.get(&weight_id).unwrap();
 
                 self.weight_layers[0][input_i][value_i] = *present_weight;
-
-                value_i += 1;
             }
-
-            input_i += 1;
         }
 
         // Other layers
 
-        let mut layer_i = 1;
-        while layer_i < self.activation_layers.len() {
-            let mut activation_index = 0;
-            while activation_index < self.activation_layers[layer_i].len() {
-                let mut weight_i = 0;
-
-                while weight_i < self.weight_layers[layer_i][activation_index].len() {
+        for layer_i in 1..self.activation_layers.len() {
+            for activation_index in 0..self.activation_layers[layer_i].len() {
+                for weight_i in 0..self.weight_layers[layer_i][activation_index].len() {
                     self.weight_layers[layer_i][activation_index][weight_i] +=
                         rng.gen_range(-self.learning_rate, self.learning_rate);
-                    weight_i += 1;
                 }
-
-                activation_index += 1;
             }
-
-            layer_i += 1;
         }
 
         #[cfg(feature = "debug_network")]
