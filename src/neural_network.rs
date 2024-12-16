@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs;
 use std::sync::Mutex;
 
@@ -56,11 +55,11 @@ pub enum OutputName {
 pub struct Input {
     pub name: InputName,
     pub values: Vec<f64>,
-    pub weight_ids: Vec<u32>,
+    pub weight_ids: Vec<usize>,
 }
 
 impl Input {
-    pub fn new(name: InputName, values: Vec<f64>, weight_ids: Vec<u32>) -> Self {
+    pub fn new(name: InputName, values: Vec<f64>, weight_ids: Vec<usize>) -> Self {
         Input {
             name,
             values,
@@ -87,13 +86,13 @@ pub struct NeuralNetwork {
     pub hidden_perceptron_count: u32,
     pub weight_layers: Vec<Vec<Vec<f64>>>,
     /**
-     * An ID reference to weights for a set of input perceptrons
+     * An ID (by index) reference to weights for a set of input perceptrons
      */
-    pub weights_by_id: HashMap<u32, f64>,
+    pub weights_by_id: Vec<f64>,
     /**
      * An input perceptron by input value weight of ids to find the input's weight
      */
-    pub input_weight_layers: Vec<Vec<u32>>,
+    pub input_weight_layers: Vec<Vec<usize>>,
     pub activation_layers: Vec<Vec<f64>>,
 }
 
@@ -108,7 +107,7 @@ impl Default for NeuralNetwork {
             //
             id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
             input_weight_layers: vec![],
-            weights_by_id: HashMap::new(),
+            weights_by_id: Vec::new(),
             weight_layers: vec![],
             activation_layers: vec![],
         }
@@ -228,8 +227,8 @@ impl NeuralNetwork {
             let mut transfer = 0.;
 
             for value_i in 0..input.values.len() {
-                transfer += inputs[input_i].values[value_i]
-                    * self.weights_by_id[&input.weight_ids[value_i]];
+                transfer += input.values[value_i]
+                    * self.weights_by_id[input.weight_ids[value_i]];
             }
 
             self.activation_layers[0][input_i] = self.relu(transfer);
@@ -284,7 +283,7 @@ impl NeuralNetwork {
 
         // Not 100% sure this works
         for tuple in self.weights_by_id.iter_mut() {
-            *tuple.1 += rng.gen_range(-self.learning_rate, self.learning_rate);
+            *tuple += rng.gen_range(-self.learning_rate, self.learning_rate);
         }
 
         // Construct new weight layers
@@ -292,7 +291,7 @@ impl NeuralNetwork {
         for input_i in 0..self.input_weight_layers.len() {
             for value_i in 0..self.input_weight_layers[input_i].len() {
                 let weight_id = self.input_weight_layers[input_i][value_i];
-                let present_weight = self.weights_by_id.get(&weight_id).unwrap();
+                let present_weight = self.weights_by_id.get(weight_id).unwrap();
 
                 self.weight_layers[0][input_i][value_i] = *present_weight;
             }
