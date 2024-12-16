@@ -224,33 +224,38 @@ impl NeuralNetwork {
 
         // Input layers
 
-        for activation_i in 0..self.activation_layers[0].len() {
-            self.activation_layers[0][activation_i] = 0.;
+        for (input_i, input) in inputs.iter().enumerate() {
+            let mut transfer = 0.;
+
+            for value_i in 0..input.values.len() {
+                transfer += inputs[input_i].values[value_i]
+                    * self.weights_by_id[&input.weight_ids[value_i]];
+            }
+
+            self.activation_layers[0][input_i] = self.relu(transfer);
         }
 
-        for (input_i, input) in inputs.iter().enumerate() {
-            for value_i in 0..input.values.len() {
-                self.activation_layers[0][input_i] += self.relu(
-                    inputs[input_i].values[value_i]
-                        * self.weights_by_id[&inputs[input_i].weight_ids[value_i]],
-                );
-            }
-        }
+        // for (input_i, input) in inputs.iter().enumerate() {
+        //     for value_i in 0..input.values.len() {
+        //         self.activation_layers[0][input_i] += self.relu(
+        //             inputs[input_i].values[value_i]
+        //                 * self.weights_by_id[&inputs[input_i].weight_ids[value_i]],
+        //         );
+        //     }
+        // }
 
         // Other layers
 
         for layer_i in 1..self.activation_layers.len() {
             for activation_i in 0..self.activation_layers[layer_i].len() {
-                self.activation_layers[layer_i][activation_i] = 0.;
+                let mut transfer = 0.;
 
-                for previous_layer_activation_i in 0..self.activation_layers[(layer_i - 1)].len() {
-                    self.activation_layers[layer_i][activation_i] += self.activation_layers
-                        [layer_i - 1][previous_layer_activation_i]
+                for previous_layer_activation_i in 0..self.activation_layers[layer_i - 1].len() {
+                    transfer += self.activation_layers[layer_i - 1][previous_layer_activation_i]
                         * self.weight_layers[layer_i][activation_i][previous_layer_activation_i];
                 }
 
-                self.activation_layers[layer_i][activation_i] =
-                    self.relu(self.activation_layers[layer_i][activation_i]);
+                self.activation_layers[layer_i][activation_i] = self.relu(transfer);
             }
         }
 
