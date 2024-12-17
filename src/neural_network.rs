@@ -1,7 +1,10 @@
 use std::fs;
 use std::sync::Mutex;
 
+use ndarray::prelude::*;
 use rand::Rng;
+
+use crate::utils::relu;
 extern crate rand;
 
 pub struct NeuralNetworkManager {
@@ -40,78 +43,13 @@ neural_network_manager: NeuralNetworkManager = NeuralNetworkManager {
 };
  */
 
-#[derive(Copy, Clone)]
-pub enum InputName {
-    X,
-    Y,
-}
-
-#[derive(Copy, Clone)]
-pub enum OutputName {
-    Result,
-}
-
-#[derive(Clone)]
-pub struct Input {
-    pub name: InputName,
-    pub values: Vec<f64>,
-    pub weight_ids: Vec<usize>,
-}
-
-impl Input {
-    pub fn new(name: InputName, values: Vec<f64>, weight_ids: Vec<usize>) -> Self {
-        Input {
-            name,
-            values,
-            weight_ids,
-        }
-    }
-}
-
-pub struct Output {
-    pub name: OutputName,
-}
-
-impl Output {
-    pub fn new(name: OutputName) -> Self {
-        Output { name }
-    }
-}
-
 pub struct NeuralNetwork {
     pub id: u32,
-    pub bias: f64,
     pub learning_rate: f64,
-    pub hidden_layers_count: u32,
-    pub hidden_perceptron_count: u32,
-    pub weight_layers: Vec<Vec<Vec<f64>>>,
-    /**
-     * An ID (by index) reference to weights for a set of input perceptrons
-     */
-    pub weights_by_id: Vec<f64>,
-    /**
-     * An input perceptron by input value weight of ids to find the input's weight
-     */
-    pub input_weight_layers: Vec<Vec<usize>>,
-    pub activation_layers: Vec<Vec<f64>>,
-}
-
-impl Default for NeuralNetwork {
-    fn default() -> Self {
-        Self {
-            // config
-            bias: 0.,
-            learning_rate: 0.1,
-            hidden_layers_count: 2,
-            hidden_perceptron_count: 10,
-            //
-            id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
-            input_weight_layers: vec![],
-            weights_by_id: Vec::new(),
-            weight_layers: vec![],
-            activation_layers: vec![],
-        }
-    }
+    /// A list of each layer (by index) with values describing the amount of perceptrons in the layer
+    pub layers: Vec<usize>,
+    pub bias_layers: Vec<Array2<f64>>,
+    pub weight_layers: Vec<Array2<f64>>,
 }
 
 impl NeuralNetwork {
@@ -134,139 +72,136 @@ impl NeuralNetwork {
     //          */
     //     }
 
-    pub fn new(
-        bias: f64,
-        learning_rate: f64,
-        hidden_layers_count: u32,
-        hidden_perceptron_count: u32,
-    ) -> Self {
+    pub fn new(bias: f64, learning_rate: f64, layers: Vec<usize>) -> Self {
+        let weight_layers = Self::empty_weight_layers(&layers);
+        let bias_layers = Self::empty_bias_layers(&layers, bias);
+        let activation_layers = Array2::from_shape_vec((1, 1), vec![0.]).unwrap();
+
         Self {
-            bias,
+            weight_layers,
+            bias_layers,
             learning_rate,
-            hidden_layers_count,
-            hidden_perceptron_count,
-            ..Default::default()
+            layers,
+            id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
         }
     }
 
-    pub fn build(&mut self, inputs: &[Input], output_count: usize) -> &mut Self {
-        #[cfg(feature = "debug_network")]
-        println!("Build");
+    fn empty_weight_layers(layers: &[usize]) -> Vec<Array2<f64>> {
+        let mut weight_layers: Vec<Array2<f64>> = Vec::new();
 
-        self.weight_layers.push(vec![]);
-        self.activation_layers.push(vec![]);
+        // Input layers
 
-        // Construct the input layer
+        let mut layer_vec = Vec::new();
 
-        for input_i in 0..inputs.len() {
-            self.input_weight_layers
-                .push(inputs[input_i].weight_ids.clone());
-
-            self.weight_layers[0].push(vec![]);
-            self.activation_layers[0].push(0.);
-
-            let input = &inputs[input_i];
-
-            for value_i in 0..input.values.len() {
-                self.weights_by_id
-                    .insert(inputs[input_i].weight_ids[value_i], self.bias);
-                self.weight_layers[0][input_i].push(self.bias);
-            }
+        for _ in 0..layers[0] {
+            layer_vec.push(0.);
         }
 
-        // Construct hidden layers
+        weight_layers.push(Array2::from_shape_vec((layers[0], 1), layer_vec).unwrap());
 
-        for layer_i in 1..self.hidden_layers_count + 1 {
-            self.weight_layers.push(vec![]);
-            self.activation_layers.push(vec![]);
+        // Hidden and output layers
 
-            for perceptron_i in 0..self.hidden_layers_count {
-                self.weight_layers[layer_i as usize].push(vec![]);
+        for layer_i in 1..layers.len() - 1 {
+            let mut layer_vec = Vec::new();
 
-                for _ in 0..self.activation_layers[(layer_i - 1) as usize].len() {
-                    self.weight_layers[layer_i as usize][perceptron_i as usize].push(self.bias);
+            for _ in 0..layers[layer_i] {
+                for _ in 0..layers[layer_i - 1] {
+                    layer_vec.push(0.);
                 }
-
-                self.activation_layers[layer_i as usize].push(0.);
-            }
-        }
-
-        // Output layers
-
-        self.weight_layers.push(vec![]);
-        self.activation_layers.push(vec![]);
-
-        let last_layer_index = self.activation_layers.len() - 1;
-
-        for output_i in 0..output_count {
-            self.weight_layers[last_layer_index].push(vec![]);
-
-            for _ in 0..self.activation_layers[last_layer_index - 1].len() {
-                self.weight_layers[last_layer_index][output_i].push(self.bias);
             }
 
-            self.activation_layers[last_layer_index].push(0.);
+            weight_layers.push(
+                Array2::from_shape_vec((layers[layer_i], layers[layer_i - 1]), layer_vec).unwrap(),
+            );
         }
 
-        #[cfg(feature = "debug_network")]
-        println!("{:?}", self.activation_layers);
+        weight_layers
+    }
 
-        self
+    fn empty_bias_layers(layers: &[usize], bias: f64) -> Vec<Array2<f64>> {
+        let mut bias_layers: Vec<Array2<f64>> = Vec::new();
+
+        // Input layers
+
+        let mut layer_vec = Vec::new();
+
+        for _ in 0..layers[0] {
+            layer_vec.push(bias);
+        }
+
+        bias_layers.push(Array2::from_shape_vec((layers[0], 1), layer_vec).unwrap());
+
+        // Hidden and output layers
+
+        for layer_i in 1..layers.len() - 1 {
+            let mut layer_vec = Vec::new();
+
+            for _ in 0..layers[layer_i] {
+                for _ in 0..layers[layer_i - 1] {
+                    layer_vec.push(bias);
+                }
+            }
+
+            bias_layers.push(
+                Array2::from_shape_vec((layers[layer_i], layers[layer_i - 1]), layer_vec).unwrap(),
+            );
+        }
+
+        bias_layers
     }
 
     /**
      *
      */
-    pub fn forward_propagate(&mut self, inputs: &[Input]) {
+    pub fn forward_propagate(&self, inputs: &[f64]) -> Vec<Array2<f64>> {
         #[cfg(feature = "debug_network")]
         println!("Foward prop");
 
-        // Input layers
+        let mut activation_layers: Vec<Array2<f64>> = Vec::new();
 
-        for (input_i, input) in inputs.iter().enumerate() {
-            let mut transfer = 0.;
+        // Construct activation layers
 
-            for value_i in 0..input.values.len() {
-                transfer += input.values[value_i]
-                    * self.weights_by_id[input.weight_ids[value_i]];
-            }
+        // Input Layers
 
-            self.activation_layers[0][input_i] = self.relu(transfer);
+        let mut layer_vec = Vec::new();
+
+        for input in inputs {
+            layer_vec.push(*input);
         }
 
-        // for (input_i, input) in inputs.iter().enumerate() {
-        //     for value_i in 0..input.values.len() {
-        //         self.activation_layers[0][input_i] += self.relu(
-        //             inputs[input_i].values[value_i]
-        //                 * self.weights_by_id[&inputs[input_i].weight_ids[value_i]],
-        //         );
-        //     }
-        // }
+        let array: Array2<f64> = Array2::from_shape_vec((self.layers[0], 1), layer_vec).unwrap()
+            * &self.weight_layers[0]
+            + &self.bias_layers[0];
+        activation_layers.push(array);
 
-        // Other layers
+        // Hidden and output layers
 
-        for layer_i in 1..self.activation_layers.len() {
-            for activation_i in 0..self.activation_layers[layer_i].len() {
-                let mut transfer = 0.;
+        for layer_i in 1..self.layers.len() - 1 {
+            let mut layer_vec = Vec::new();
 
-                for previous_layer_activation_i in 0..self.activation_layers[layer_i - 1].len() {
-                    transfer += self.activation_layers[layer_i - 1][previous_layer_activation_i]
-                        * self.weight_layers[layer_i][activation_i][previous_layer_activation_i];
+            for _ in 0..self.layers[layer_i] {
+                for previous in activation_layers[layer_i - 1].iter() {
+                    layer_vec.push(*previous);
                 }
-
-                self.activation_layers[layer_i][activation_i] = self.relu(transfer);
             }
+
+            let array =
+                Array2::from_shape_vec((self.layers[layer_i], self.layers[layer_i - 1]), layer_vec)
+                    .unwrap()
+                    * &self.weight_layers[layer_i]
+                    + &self.bias_layers[layer_i];
+            activation_layers.push(array);
         }
 
         #[cfg(feature = "debug_network")]
-        println!("{:?}", self.activation_layers);
+        println!("{:?}", activation_layers);
+
+        activation_layers
     }
 
-    fn relu(&mut self, value: f64) -> f64 {
-        value.max(0.)
+    pub fn backwards_propagate(&mut self) {
+        
     }
-
-    pub fn back_propagate(&mut self, scored_outputs: bool) {}
 
     /**
      * Randomly increases or decreases weights
@@ -277,35 +212,16 @@ impl NeuralNetwork {
 
         let mut rng = rand::thread_rng();
 
-        // Input layer
+        // Weight layers
 
-        // Mutate weights
-
-        // Not 100% sure this works
-        for tuple in self.weights_by_id.iter_mut() {
-            *tuple += rng.gen_range(-self.learning_rate, self.learning_rate);
+        for weight in self.weight_layers.iter_mut() {
+            *weight += rng.gen_range(-self.learning_rate, self.learning_rate);
         }
 
-        // Construct new weight layers
+        // Bias layers
 
-        for input_i in 0..self.input_weight_layers.len() {
-            for value_i in 0..self.input_weight_layers[input_i].len() {
-                let weight_id = self.input_weight_layers[input_i][value_i];
-                let present_weight = self.weights_by_id.get(weight_id).unwrap();
-
-                self.weight_layers[0][input_i][value_i] = *present_weight;
-            }
-        }
-
-        // Other layers
-
-        for layer_i in 1..self.activation_layers.len() {
-            for activation_index in 0..self.activation_layers[layer_i].len() {
-                for weight_i in 0..self.weight_layers[layer_i][activation_index].len() {
-                    self.weight_layers[layer_i][activation_index][weight_i] +=
-                        rng.gen_range(-self.learning_rate, self.learning_rate);
-                }
-            }
+        for bias in self.bias_layers.iter_mut() {
+            *bias += rng.gen_range(-self.learning_rate, self.learning_rate);
         }
 
         #[cfg(feature = "debug_network")]
@@ -320,11 +236,13 @@ impl NeuralNetwork {
     }
 
     pub fn write_weights(&self) {
-        fs::write("weights_by_id.txt", format!("{:?}", self.weights_by_id))
-            .expect("Unable to write weights by id");
-
         fs::write("weight_layers.txt", format!("{:?}", self.weight_layers))
             .expect("Unable to write weight layers");
+    }
+
+    pub fn write_biases(&self) {
+        fs::write("bias_layers.txt", format!("{:?}", self.bias_layers))
+            .expect("Unable to write bias layers");
     }
 
     pub fn init_visuals(&mut self) {}
@@ -335,15 +253,11 @@ impl NeuralNetwork {
 impl Clone for NeuralNetwork {
     fn clone(&self) -> NeuralNetwork {
         NeuralNetwork {
-            bias: self.bias,
             learning_rate: self.learning_rate,
-            hidden_layers_count: self.hidden_layers_count,
-            hidden_perceptron_count: self.hidden_perceptron_count,
+            layers: self.layers.clone(),
             id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
-            input_weight_layers: self.input_weight_layers.clone(),
-            weights_by_id: self.weights_by_id.clone(),
+            bias_layers: self.bias_layers.clone(),
             weight_layers: self.weight_layers.clone(),
-            activation_layers: self.activation_layers.clone(),
         }
     }
 }

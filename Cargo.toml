@@ -11,6 +11,7 @@ edition = "2021"
 [dependencies]
 rand = "0.7.3"
 float-ord = "0.3.2"
+ndarray = { version = "0.16.1", features = ["serde"] }
 
 [features]
 debug_network = []

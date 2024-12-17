@@ -3,12 +3,11 @@
 
 use std::{vec, collections::HashMap, borrow::Borrow, time::{Duration, Instant}};
 
-use neural_network::{InputName, OutputName};
-
 use std::sync::mpsc::Sender;
 
 pub mod neural_network;
-use crate::neural_network::{Input, Output, NeuralNetwork,NEURAL_NETWORK_MANAGER};
+pub mod utils;
+use crate::neural_network::{NeuralNetwork,NEURAL_NETWORK_MANAGER};
 
 const TICK_SPEED: u32 = 1;
 
@@ -17,33 +16,18 @@ fn main() {
 
     /* let neural_network_manager = NeuralNetworkManager::new(); */
 
-    let inputs: Vec<Input> = vec![
-        Input::new(
-            InputName::X,
-            vec![1., 3.],
-            vec![1, 2],
-        ),
-        Input::new(
-            InputName::Y,
-            vec![2.],
-            vec![1],
-        ),
-    ];
-    let outputs: Vec<Output> = vec![
-        Output::new(OutputName::Result),
-    ];
+    let inputs: Vec<f64> = vec![1., 3.];
+    let output_count = 5;
     
-    let mut neural_network = init(&inputs, outputs.len());
+    let mut neural_network = init(inputs.len(), output_count);
     // tick_manager(&mut neural_network, inputs);
     
     println!("End");
 }
 
-pub fn init(inputs: &Vec<Input>, output_count: usize) -> NeuralNetwork {
+pub fn init(input_count: usize, output_count: usize) -> NeuralNetwork {
     
-    let mut neural_network = NeuralNetwork::default();
-    neural_network.build(inputs, output_count);
-
+    let neural_network = NeuralNetwork::new(0., 0.1, vec![input_count, 5, 3, output_count]);
     neural_network
 }
 
