@@ -4,7 +4,7 @@ use std::sync::Mutex;
 use ndarray::prelude::*;
 use rand::Rng;
 
-use crate::utils::relu;
+use crate::utils::{relu, relu_derivative};
 extern crate rand;
 
 pub struct NeuralNetworkManager {
@@ -169,10 +169,11 @@ impl NeuralNetwork {
             layer_vec.push(*input);
         }
 
-        let array: Array2<f64> = Array2::from_shape_vec((self.layers[0], 1), layer_vec).unwrap()
-            * &self.weight_layers[0]
+        let array: Array2<f64> = Array2::from_shape_vec((self.layers[0], 1), layer_vec)
+            .unwrap()
+            .dot(&self.weight_layers[0])
             + &self.bias_layers[0];
-        activation_layers.push(array);
+        activation_layers.push(array.map(|x| relu(*x)));
 
         // Hidden and output layers
 
@@ -188,9 +189,9 @@ impl NeuralNetwork {
             let array =
                 Array2::from_shape_vec((self.layers[layer_i], self.layers[layer_i - 1]), layer_vec)
                     .unwrap()
-                    * &self.weight_layers[layer_i]
+                    .dot(&self.weight_layers[layer_i])
                     + &self.bias_layers[layer_i];
-            activation_layers.push(array);
+            activation_layers.push(array.map(|x| relu(*x)));
         }
 
         #[cfg(feature = "debug_network")]
@@ -199,8 +200,22 @@ impl NeuralNetwork {
         activation_layers
     }
 
-    pub fn backwards_propagate(&mut self) {
-        
+    pub fn backwards_propagate(&mut self, activation_layers: &[Array2<f64>]) -> Vec<Array2<f64>> {
+        let mut gradients = Vec::new();
+
+        // Output layer
+
+
+
+        // Middle and input layer
+
+        for layer_i in (0..self.layers.len() - 2).rev() {
+            // Previous times current, then relu derivatived
+            let activations = &gradients[layer_i - 1] * &activation_layers[layer_i];
+            gradients.push(activations.map(|x| relu_derivative(*x)));   
+        }
+
+        gradients
     }
 
     /**
