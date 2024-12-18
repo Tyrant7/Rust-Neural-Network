@@ -75,7 +75,6 @@ impl NeuralNetwork {
     pub fn new(bias: f64, learning_rate: f64, layers: Vec<usize>) -> Self {
         let weight_layers = Self::empty_weight_layers(&layers);
         let bias_layers = Self::empty_bias_layers(&layers, bias);
-        let activation_layers = Array2::from_shape_vec((1, 1), vec![0.]).unwrap();
 
         Self {
             weight_layers,
@@ -97,7 +96,7 @@ impl NeuralNetwork {
             layer_vec.push(0.);
         }
 
-        weight_layers.push(Array2::from_shape_vec((layers[0], 1), layer_vec).unwrap());
+        weight_layers.push(Array2::from_shape_vec((1, layers[0]), layer_vec).unwrap());
 
         // Hidden and output layers
 
@@ -129,7 +128,7 @@ impl NeuralNetwork {
             layer_vec.push(bias);
         }
 
-        bias_layers.push(Array2::from_shape_vec((layers[0], 1), layer_vec).unwrap());
+        bias_layers.push(Array2::from_shape_vec((1, layers[0]), layer_vec).unwrap());
 
         // Hidden and output layers
 
@@ -168,8 +167,8 @@ impl NeuralNetwork {
         for input in inputs {
             layer_vec.push(*input);
         }
-
-        let array: Array2<f64> = Array2::from_shape_vec((self.layers[0], 1), layer_vec)
+        
+        let array: Array2<f64> = Array2::from_shape_vec((1, self.layers[0]), layer_vec)
             .unwrap()
             .dot(&self.weight_layers[0])
             + &self.bias_layers[0];
