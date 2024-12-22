@@ -11,7 +11,7 @@ use crate::neural_network::{NeuralNetwork,NEURAL_NETWORK_MANAGER};
 
 const TICK_SPEED: u32 = 1;
 
-fn main() {
+pub fn main() {
     println!("Begin");
 
     /* let neural_network_manager = NeuralNetworkManager::new(); */
@@ -20,7 +20,7 @@ fn main() {
     let output_count = 5;
     
     let mut neural_network = init(inputs.len(), output_count);
-    // tick_manager(&mut neural_network, inputs);
+    run_ticks(&mut neural_network, inputs);
     
     println!("End");
 }
@@ -31,31 +31,27 @@ pub fn init(input_count: usize, output_count: usize) -> NeuralNetwork {
     neural_network
 }
 
-// pub fn tick_manager(neural_network: &mut NeuralNetwork, inputs: Vec<Input>) {
+pub fn run_ticks(neural_network: &mut NeuralNetwork, inputs: Vec<f64>) {
 
-//     let time_start = Instant::now();
-
-//     let timer = Timer::new();
-//     let ticks = timer.interval_ms(TICK_SPEED).iter();
+    let time_start = Instant::now();
     
-//     for (tick, _) in ticks.enumerate() {
+    for tick in 0..500 {
+        if tick > 500 {
+            break;
+        }
 
-//         if tick > 500 {
-//             break;
-//         }
+        print!("Processing tick: ");
+        println!("{}", tick);
 
-//         print!("Processing tick: ");
-//         println!("{}", tick);
+        let time_elapsed = time_start.elapsed();
+        println!("{:?}", time_elapsed);
 
-//         let time_elapsed = time_start.elapsed();
-//         println!("{:?}", time_elapsed);
+        neural_network.forward_propagate(&inputs);
 
-//         neural_network.forward_propagate(&inputs);
+        if tick % 10 == 0 {
 
-//         if tick % 10 == 0 {
-
-//             neural_network.mutate();
-//             neural_network.write_to_file();
-//         }
-//     }
-// }
+            neural_network.mutate();
+            neural_network.write_to_file();
+        }
+    }
+}

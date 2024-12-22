@@ -170,7 +170,7 @@ impl NeuralNetwork {
         
         let array: Array2<f64> = Array2::from_shape_vec((1, self.layers[0]), layer_vec)
             .unwrap()
-            .dot(&self.weight_layers[0])
+            * &self.weight_layers[0]
             + &self.bias_layers[0];
         activation_layers.push(array.map(|x| relu(*x)));
 
@@ -188,7 +188,7 @@ impl NeuralNetwork {
             let array =
                 Array2::from_shape_vec((self.layers[layer_i], self.layers[layer_i - 1]), layer_vec)
                     .unwrap()
-                    .dot(&self.weight_layers[layer_i])
+                    * &self.weight_layers[layer_i]
                     + &self.bias_layers[layer_i];
             activation_layers.push(array.map(|x| relu(*x)));
         }
