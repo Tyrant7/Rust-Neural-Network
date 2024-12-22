@@ -201,22 +201,24 @@ impl NeuralNetwork {
             println!("weight layers {}", self.weight_layers[layer_i].len());
             println!("bias layers {}", self.bias_layers[layer_i].len());
 
-            for weights in self.weight_layers[layer_i].iter() {
+            // for weights in self.weight_layers[layer_i].iter() {
                 
-            }
+            // }
 
-            let x = &activation_layers[layer_i - 1] * &self.weight_layers[layer_i];
-            println!("x {}", x);
+            let activations = &activation_layers[layer_i - 1] * &self.weight_layers[layer_i];
+            println!("x {}", activations);
+
+            activation_layers.push(activations.map(|x| relu(*x)));
 
             // for each perceptron's weights, 
 
 
-            let array =
-                Array2::from_shape_vec((self.layers[layer_i - 1], self.layers[layer_i]), layer_vec)
-                    .unwrap()
-                    * &self.weight_layers[layer_i]
-                    + &self.bias_layers[layer_i];
-            activation_layers.push(array.map(|x| relu(*x)));
+            // let array =
+            //     Array2::from_shape_vec((self.layers[layer_i - 1], self.layers[layer_i]), layer_vec)
+            //         .unwrap()
+            //         * &self.weight_layers[layer_i]
+            //         + &self.bias_layers[layer_i];
+            // activation_layers.push(array.map(|x| relu(*x)));
         }
 
         #[cfg(feature = "debug_network")]
