@@ -155,6 +155,11 @@ impl NeuralNetwork {
     pub fn forward_propagate(&self, inputs: &[f64]) -> Vec<Array2<f64>> {
         #[cfg(feature = "debug_network")]
         println!("Foward prop");
+        
+        // Don't do weight opperations on the input layer
+        // For the second layers and beyond, use dot product
+        // construct input layer from inputs vec
+        // 
 
         let mut activation_layers: Vec<Array2<f64>> = Vec::new();
 
@@ -196,9 +201,18 @@ impl NeuralNetwork {
             println!("weight layers {}", self.weight_layers[layer_i].len());
             println!("bias layers {}", self.bias_layers[layer_i].len());
 
+            for weights in self.weight_layers[layer_i].iter() {
+                
+            }
+
+            let x = &activation_layers[layer_i - 1] * &self.weight_layers[layer_i];
+            println!("x {}", x);
+
+            // for each perceptron's weights, 
+
 
             let array =
-                Array2::from_shape_vec((self.layers[layer_i], self.layers[layer_i - 1]), layer_vec)
+                Array2::from_shape_vec((self.layers[layer_i - 1], self.layers[layer_i]), layer_vec)
                     .unwrap()
                     * &self.weight_layers[layer_i]
                     + &self.bias_layers[layer_i];
