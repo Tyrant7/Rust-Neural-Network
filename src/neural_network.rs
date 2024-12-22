@@ -179,10 +179,16 @@ impl NeuralNetwork {
         for layer_i in 1..self.layers.len() - 1 {
             let mut layer_vec = Vec::new();
 
-            for _ in 0..self.layers[layer_i] {
-                for previous in activation_layers[layer_i - 1].iter() {
-                    layer_vec.push(*previous);
-                }
+            // for perceptron_i in 0..self.layers[layer_i] {
+            //     // Looping through way too many values
+            //     for previous_i in activation_layers[layer_i - 1].iter() {
+            //         activation_layers[]
+            //         layer_vec.push(*previous);
+            //     }
+            // }
+
+            for previous in activation_layers[layer_i - 1].iter() {
+                layer_vec.push(*previous);
             }
 
             println!("layer vec {}", layer_vec.len());
