@@ -185,6 +185,11 @@ impl NeuralNetwork {
                 }
             }
 
+            println!("layer vec {}", layer_vec.len());
+            println!("weight layers {}", self.weight_layers[layer_i]);
+            println!("bias layers {}", self.bias_layers[layer_i]);
+
+
             let array =
                 Array2::from_shape_vec((self.layers[layer_i], self.layers[layer_i - 1]), layer_vec)
                     .unwrap()
