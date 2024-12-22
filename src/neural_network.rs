@@ -186,8 +186,9 @@ impl NeuralNetwork {
             }
 
             println!("layer vec {}", layer_vec.len());
-            println!("weight layers {}", self.weight_layers[layer_i]);
-            println!("bias layers {}", self.bias_layers[layer_i]);
+            println!("shape {} {}", self.layers[layer_i], self.layers[layer_i - 1]);
+            println!("weight layers {}", self.weight_layers[layer_i].len());
+            println!("bias layers {}", self.bias_layers[layer_i].len());
 
 
             let array =
@@ -233,14 +234,18 @@ impl NeuralNetwork {
 
         // Weight layers
 
-        for weight in self.weight_layers.iter_mut() {
-            *weight += rng.gen_range(-self.learning_rate, self.learning_rate);
+        for weights in self.weight_layers.iter_mut() {
+            for weight in weights.iter_mut() {
+                *weight += rng.gen_range(-self.learning_rate, self.learning_rate);
+            }
         }
 
         // Bias layers
 
-        for bias in self.bias_layers.iter_mut() {
-            *bias += rng.gen_range(-self.learning_rate, self.learning_rate);
+        for biases in self.bias_layers.iter_mut() {
+            for bias in biases.iter_mut() {
+                *bias += rng.gen_range(-self.learning_rate, self.learning_rate);
+            }
         }
 
         #[cfg(feature = "debug_network")]
