@@ -45,11 +45,11 @@ neural_network_manager: NeuralNetworkManager = NeuralNetworkManager {
 
 pub struct NeuralNetwork {
     pub id: u32,
-    pub learning_rate: f64,
+    pub learning_rate: f32,
     /// A list of each layer (by index) with values describing the amount of perceptrons in the layer
     pub layers: Vec<usize>,
-    pub bias_layers: Vec<Array2<f64>>,
-    pub weight_layers: Vec<Array2<f64>>,
+    pub bias_layers: Vec<Array2<f32>>,
+    pub weight_layers: Vec<Array2<f32>>,
 }
 
 impl NeuralNetwork {
@@ -72,7 +72,7 @@ impl NeuralNetwork {
     //          */
     //     }
 
-    pub fn new(bias: f64, learning_rate: f64, layers: Vec<usize>) -> Self {
+    pub fn new(bias: f32, learning_rate: f32, layers: Vec<usize>) -> Self {
         let weight_layers = Self::empty_weight_layers(&layers);
         let bias_layers = Self::empty_bias_layers(&layers, bias);
 
@@ -85,28 +85,21 @@ impl NeuralNetwork {
         }
     }
 
-    fn empty_weight_layers(layers: &[usize]) -> Vec<Array2<f64>> {
-        let mut weight_layers: Vec<Array2<f64>> = Vec::new();
+    fn empty_weight_layers(layers: &[usize]) -> Vec<Array2<f32>> {
+        let mut weight_layers: Vec<Array2<f32>> = Vec::new();
 
         // Input layers
 
-        let mut layer_vec = Vec::new();
-
-        for _ in 0..layers[0] {
-            layer_vec.push(0.);
-        }
-
-        weight_layers.push(Array2::from_shape_vec((1, layers[0]), layer_vec).unwrap());
-
         // Hidden and output layers
 
-        for layer_i in 1..layers.len() - 1 {
+        for layer_i in 1..layers.len() {
             let mut layer_vec = Vec::new();
 
-            for _ in 0..layers[layer_i] {
-                for _ in 0..layers[layer_i - 1] {
-                    layer_vec.push(0.);
-                }
+            // Previous layer perceptrons times current layer perceptrons
+            let weights_count = (layers[layer_i]) * layers[layer_i - 1];
+
+            for _ in 0..weights_count {
+                layer_vec.push(0.);
             }
 
             weight_layers.push(
@@ -117,32 +110,20 @@ impl NeuralNetwork {
         weight_layers
     }
 
-    fn empty_bias_layers(layers: &[usize], bias: f64) -> Vec<Array2<f64>> {
-        let mut bias_layers: Vec<Array2<f64>> = Vec::new();
-
-        // Input layers
-
-        let mut layer_vec = Vec::new();
-
-        for _ in 0..layers[0] {
-            layer_vec.push(bias);
-        }
-
-        bias_layers.push(Array2::from_shape_vec((1, layers[0]), layer_vec).unwrap());
+    fn empty_bias_layers(layers: &[usize], bias: f32) -> Vec<Array2<f32>> {
+        let mut bias_layers: Vec<Array2<f32>> = Vec::new();
 
         // Hidden and output layers
 
-        for layer_i in 1..layers.len() - 1 {
+        for perceptron_count in layers.iter().take(layers.len()).skip(1) {
             let mut layer_vec = Vec::new();
 
-            for _ in 0..layers[layer_i] {
-                for _ in 0..layers[layer_i - 1] {
-                    layer_vec.push(bias);
-                }
+            for _ in 0..*perceptron_count {
+                layer_vec.push(bias);
             }
 
             bias_layers.push(
-                Array2::from_shape_vec((layers[layer_i], layers[layer_i - 1]), layer_vec).unwrap(),
+                Array2::from_shape_vec((*perceptron_count, 1), layer_vec).unwrap(),
             );
         }
 
@@ -152,38 +133,23 @@ impl NeuralNetwork {
     /**
      *
      */
-    pub fn forward_propagate(&self, inputs: &[f64]) -> Vec<Array2<f64>> {
+    pub fn forward_propagate(&self, inputs: Vec<f32>) -> Vec<Array2<f32>> {
         #[cfg(feature = "debug_network")]
         println!("Foward prop");
-        
+
         // Don't do weight opperations on the input layer
         // For the second layers and beyond, use dot product
         // construct input layer from inputs vec
-        // 
+        //
 
-        let mut activation_layers: Vec<Array2<f64>> = Vec::new();
-
-        // Construct activation layers
-
-        // Input Layers
-
-        let mut layer_vec = Vec::new();
-
-        for input in inputs {
-            layer_vec.push(*input);
-        }
-        
-        let array: Array2<f64> = Array2::from_shape_vec((1, self.layers[0]), layer_vec)
-            .unwrap()
-            * &self.weight_layers[0]
-            + &self.bias_layers[0];
-        activation_layers.push(array.map(|x| relu(*x)));
+        let mut activation_layers: Vec<Array2<f32>> = Vec::new();
+        let inputs_array: Array2<f32> = Array2::from_shape_vec((self.layers[0], 1), inputs).unwrap();
 
         // Hidden and output layers
 
-        for layer_i in 1..self.layers.len() - 1 {
-            let mut layer_vec = Vec::new();
-
+        for layer_i in 0..self.layers.len() - 1 {
+            // let mut layer_vec = Vec::new();
+            // println!("doing layer {}", layer_i);
             // for perceptron_i in 0..self.layers[layer_i] {
             //     // Looping through way too many values
             //     for previous_i in activation_layers[layer_i - 1].iter() {
@@ -192,33 +158,42 @@ impl NeuralNetwork {
             //     }
             // }
 
-            for previous in activation_layers[layer_i - 1].iter() {
-                layer_vec.push(*previous);
-            }
-
-            println!("layer vec {}", layer_vec.len());
-            println!("shape {} {}", self.layers[layer_i], self.layers[layer_i - 1]);
-            println!("weight layers {}", self.weight_layers[layer_i].len());
-            println!("bias layers {}", self.bias_layers[layer_i].len());
-
-            // for weights in self.weight_layers[layer_i].iter() {
-                
+            // for previous in activation_layers[layer_i - 1].iter() {
+            //     layer_vec.push(*previous);
             // }
 
-            let activations = &activation_layers[layer_i - 1] * &self.weight_layers[layer_i];
-            println!("x {}", activations);
+            // println!("layer vec {}", layer_vec.len());
+            // println!(
+            //     "shape {}",
+            //     self.layers[layer_i]
+            // );
+            // println!("weight layers {}", self.weight_layers[layer_i]);
+            // println!("bias layers {}", self.bias_layers[layer_i]);
 
-            activation_layers.push(activations.map(|x| relu(*x)));
+            // for weights in self.weight_layers[layer_i].iter() {
 
-            // for each perceptron's weights, 
+            // }
 
+            // let activations = &activation_layers[layer_i - 1] * &self.weight_layers[layer_i]
+            //     + &self.bias_layers[layer_i];
+            // println!("x {}", activations);
 
-            // let array =
+            // for each perceptron's weights,
+
+            // let transfers =
             //     Array2::from_shape_vec((self.layers[layer_i - 1], self.layers[layer_i]), layer_vec)
             //         .unwrap()
             //         * &self.weight_layers[layer_i]
             //         + &self.bias_layers[layer_i];
-            // activation_layers.push(array.map(|x| relu(*x)));
+
+            let previous_activations: &Array2<f32> = activation_layers.get(layer_i.saturating_sub(1)).unwrap_or(&inputs_array);
+            // println!("previous_activations {}", previous_activations);
+            let transfers = self.weight_layers[layer_i].dot(
+                previous_activations,
+            ) + &self.bias_layers[layer_i];
+            
+            let activations = transfers.mapv(relu);
+            activation_layers.push(activations);
         }
 
         #[cfg(feature = "debug_network")]
@@ -227,19 +202,20 @@ impl NeuralNetwork {
         activation_layers
     }
 
-    pub fn backwards_propagate(&mut self, activation_layers: &[Array2<f64>]) -> Vec<Array2<f64>> {
+    pub fn backwards_propagate(&mut self, activation_layers: &[Array2<f32>]) -> Vec<Array2<f32>> {
+
+        // Not done yet and needs changes
+
         let mut gradients = Vec::new();
 
         // Output layer
-
-
 
         // Middle and input layer
 
         for layer_i in (0..self.layers.len() - 2).rev() {
             // Previous times current, then relu derivatived
             let activations = &gradients[layer_i - 1] * &activation_layers[layer_i];
-            gradients.push(activations.map(|x| relu_derivative(*x)));   
+            gradients.push(activations.map(|x| relu_derivative(*x)));
         }
 
         gradients
