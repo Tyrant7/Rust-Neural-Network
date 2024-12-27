@@ -206,19 +206,36 @@ impl NeuralNetwork {
 
         // Not done yet and needs changes
 
-        let mut gradients = Vec::new();
+        let mut gradient_layers = Vec::new();
 
         // Output layer
 
         // Middle and input layer
 
-        for layer_i in (0..self.layers.len() - 2).rev() {
+        for layer_i in (0..self.layers.len() - 1).rev() {
             // Previous times current, then relu derivatived
-            let activations = &gradients[layer_i - 1] * &activation_layers[layer_i];
-            gradients.push(activations.map(|x| relu_derivative(*x)));
+            let previous_activations = activation_layers[layer_i].clone();
+            let activations: Array2<f32> = &gradient_layers[layer_i - 1] * &activation_layers[layer_i];
+
+            let gradients: Array2<f32> = array![[0.]];
+
+            let da: Array2<f32> = &gradient_layers[layer_i - 1] * activations.mapv(relu_derivative);
+            let dw = (1.0 / &activation_layers[layer_i]) * (da.dot(&previous_activations.reversed_axes()));
+            let db = &self.bias_layers[layer_i];
+            let da_prev = self.weight_layers[layer_i].dot(&da);
+
+            // Update weights
+
+            self.weight_layers[layer_i] = self.weight_layers[layer_i].clone() - (gradients * self.learning_rate);
+
+            // Update biases
+
+            //
+
+            gradient_layers.push(activations);
         }
 
-        gradients
+        gradient_layers
     }
 
     /**
