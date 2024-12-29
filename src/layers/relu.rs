@@ -1,14 +1,10 @@
-use crate::layer::{Layer, LayerShape};
+use crate::layer::Layer;
 
-pub struct ReLU {
-    shape: LayerShape,
-}
+pub struct ReLU;
 
 impl ReLU {
-    pub fn new(input_shape: u32, output_shape: u32) -> Self {
-        ReLU {
-            shape: LayerShape::new(input_shape, output_shape),
-        }
+    pub fn new() -> Self {
+        ReLU
     }
 }
 

@@ -20,6 +20,7 @@ pub mod layer;
 pub mod layers;
 use layers::linear::Linear;
 use layers::relu::ReLU;
+use layers::sigmoid::Sigmoid;
 
 const TICK_SPEED: u32 = 1;
 
@@ -33,6 +34,13 @@ pub fn main() {
     run_ticks(&mut neural_network, inputs);
 
     println!("End");
+
+
+
+    let mut network = create_network(
+        Linear::new(20, 20), 
+        ReLU::new(), 
+        Linear::new(20, 3));
 }
 
 pub fn init(input_count: usize, output_count: usize) -> NeuralNetwork {

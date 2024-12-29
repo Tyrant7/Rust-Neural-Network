@@ -21,7 +21,7 @@ impl Layer for Linear {
         input // TODO
     }
 
-    fn backward(&self) -> Vec<f32> {
+    fn backward(&self, activations: Vec<f32>) -> Vec<f32> {
         vec![] // TODO
     }
 }
