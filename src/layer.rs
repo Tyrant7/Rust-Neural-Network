@@ -1,6 +1,6 @@
 pub trait Layer {
     fn forward(&self, input: Vec<f32>) -> Vec<f32>;
-    fn backward(&self) -> Vec<f32>;
+    fn backward(&self, activations: Vec<f32>) -> Vec<f32>;
 }
 
 pub struct LayerShape {
