@@ -16,27 +16,16 @@ use ndarray::{array, Array2};
 
 use crate::neural_network::{NeuralNetwork, NEURAL_NETWORK_MANAGER};
 
+pub mod layer;
+pub mod layers;
+use layers::linear::Linear;
+use layers::relu::ReLU;
+
 const TICK_SPEED: u32 = 1;
 
 pub fn main() {
     println!("Begin");
 
-    /* let neural_network_manager = NeuralNetworkManager::new(); */
-    /*
-       let inputs = array![[1], [2], [3], [4]];
-       let weights = array![[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3], [4, 4, 4, 4]]; // array![[1, 2, 3, 4]];
-    */
-/* 
-    let inputs = Array2::from_shape_vec((4, 1), vec![1, 2, 3, 4]).unwrap();
-    let weights =
-        Array2::from_shape_vec((4, 4), vec![1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4])
-            .unwrap();
-
-    let prod = weights.dot(&inputs);
-    println!("dot product {:?}", prod);
-
-    panic!("done");
- */
     let inputs: Vec<f32> = vec![1., 3.];
     let output_count = 1;
 
