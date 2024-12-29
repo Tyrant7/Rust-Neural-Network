@@ -202,40 +202,48 @@ impl NeuralNetwork {
         activation_layers
     }
 
-    pub fn backwards_propagate(&mut self, activation_layers: &[Array2<f32>]) -> Vec<Array2<f32>> {
+    pub fn backwards_propagate(&mut self, activation_layers: &[Array2<f32>], target: &Array2<f32>) -> Vec<Array2<f32>> {
 
-        // Not done yet and needs changes
+        // Define our gradients for each layer
+        let mut gradients = Vec::new();
 
-        let mut gradient_layers = Vec::new();
+        // Calculate the error at the output layer
+        let final_output = activation_layers.last().unwrap();
+        let error = final_output - target;
 
-        // Output layer
+        // Compute each gradient for the output layer
+        let output_gradient = &error * &final_output.mapv(relu_derivative);
+        gradients.push(output_gradient.clone());
 
-        // Middle and input layer
+        // Backpropagate through the hidden layers
+        let mut last_gradient = output_gradient;
+        for layer_i in (0..activation_layers.len() - 1).rev() {
+            let activations = &activation_layers[layer_i];
+            let weights = &self.weight_layers[layer_i];
 
-        for layer_i in (0..self.layers.len() - 1).rev() {
-            // Previous times current, then relu derivatived
-            let previous_activations = activation_layers[layer_i].clone();
-            let activations: Array2<f32> = &gradient_layers[layer_i - 1] * &activation_layers[layer_i];
+            // Compute gradients for the current hidden layer
+            
+            // Step 1: transpose the weights
+            let transposed_weights = weights.t();
 
-            let gradients: Array2<f32> = array![[0.]];
+            // Step 2: Propagate the error backwards
+            let propagated_error = last_gradient.dot(&transposed_weights);
 
-            let da: Array2<f32> = &gradient_layers[layer_i - 1] * activations.mapv(relu_derivative);
-            let dw = (1.0 / &activation_layers[layer_i]) * (da.dot(&previous_activations.reversed_axes()));
-            let db = &self.bias_layers[layer_i];
-            let da_prev = self.weight_layers[layer_i].dot(&da);
+            // Step 3: Compute the derivative of the activation function
+            let activation_derivaties = activations.mapv(relu_derivative);
 
-            // Update weights
+            // Step 4: Multiply each propagated error and activation derivative
+            let layer_gradient = propagated_error * activation_derivaties;
+            
+            gradients.push(layer_gradient.clone());
 
-            self.weight_layers[layer_i] = self.weight_layers[layer_i].clone() - (gradients * self.learning_rate);
-
-            // Update biases
-
-            //
-
-            gradient_layers.push(activations);
+            // Update last_gradient for the next iteration
+            last_gradient = layer_gradient;
         }
 
-        gradient_layers
+        // Reverse gradients so they match layer order (input -> output)
+        gradients.reverse();
+        gradients
     }
 
     /**
