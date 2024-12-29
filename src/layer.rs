@@ -4,23 +4,23 @@ pub trait Layer {
 }
 
 pub struct LayerShape {
-    pub input_shape: u32,
-    pub output_shape: u32,
+    pub input_shape: usize,
+    pub output_shape: usize,
 }
 
 impl LayerShape {
-    pub fn new(input_shape: u32, output_shape: u32) -> Self {
+    pub fn new(input_shape: usize, output_shape: usize) -> Self {
         LayerShape {
             input_shape,
             output_shape,
         }
     }
 
-    pub fn input_shape(&self) -> u32 {
+    pub fn input_shape(&self) -> usize {
         self.input_shape
     }
 
-    pub fn output_shape(&self) -> u32 {
+    pub fn output_shape(&self) -> usize {
         self.output_shape
     }
 }

@@ -1,24 +1,26 @@
+use ndarray::{Array2, Shape};
+
 use crate::layer::{Layer, LayerShape};
 
 pub struct Linear {
     shape: LayerShape,
-    weights: Vec<Vec<f32>>,
-    bias: Vec<f32>,
+    weights: Array2<f32>,
+    bias: Array2<f32>,
 }
 
 impl Linear {
-    pub fn new(input_shape: u32, output_shape: u32) -> Self {
+    pub fn new(input_shape: usize, output_shape: usize) -> Self {
         Linear {
             shape: LayerShape::new(input_shape, output_shape),
-            weights: vec![vec![0.; input_shape as usize]; output_shape as usize],
-            bias: vec![0.; output_shape as usize],
+            weights: Array2::from_elem((output_shape, input_shape), 0.),
+            bias: Array2::from_elem((input_shape, 1), 0.),
         }
     }
 }
 
 impl Layer for Linear {
     fn forward(&self, input: Vec<f32>) -> Vec<f32> {
-        input // TODO
+        input
     }
 
     fn backward(&self, activations: Vec<f32>) -> Vec<f32> {
