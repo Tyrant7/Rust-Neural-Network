@@ -53,25 +53,6 @@ pub struct NeuralNetwork {
 }
 
 impl NeuralNetwork {
-    //     pub fn new(mut self/* , weight_layers: Option<Vec<Vec<Vec<usize>>>>, activation_layers: Option<Vec<Vec<usize>>> */) {
-
-    //         /* self.id = NeuralNetworkManager::new_id(NeuralNetworkManager); */
-    //         /* if let Some(self.weight_layers) { self.weight_layers = weight_layers }; */
-    //          /*
-    //         if let Some(weight_layers) = weight_layers {
-    //             self.weight_layers = weight_layers;
-    //         };
-
-    //         if let Some(weight_layers) = weight_layers {
-    //             self.weight_layers = weight_layers;
-    //         };
-
-    //         if let Some(activation_layers) = activation_layers {
-    //             self.activation_layers = activation_layers
-    //         }
-    //          */
-    //     }
-
     pub fn new(bias: f32, learning_rate: f32, layers: Vec<usize>) -> Self {
         let weight_layers = Self::empty_weight_layers(&layers);
         let bias_layers = Self::empty_bias_layers(&layers, bias);
@@ -148,43 +129,6 @@ impl NeuralNetwork {
         // Hidden and output layers
 
         for layer_i in 0..self.layers.len() - 1 {
-            // let mut layer_vec = Vec::new();
-            // println!("doing layer {}", layer_i);
-            // for perceptron_i in 0..self.layers[layer_i] {
-            //     // Looping through way too many values
-            //     for previous_i in activation_layers[layer_i - 1].iter() {
-            //         activation_layers[]
-            //         layer_vec.push(*previous);
-            //     }
-            // }
-
-            // for previous in activation_layers[layer_i - 1].iter() {
-            //     layer_vec.push(*previous);
-            // }
-
-            // println!("layer vec {}", layer_vec.len());
-            // println!(
-            //     "shape {}",
-            //     self.layers[layer_i]
-            // );
-            // println!("weight layers {}", self.weight_layers[layer_i]);
-            // println!("bias layers {}", self.bias_layers[layer_i]);
-
-            // for weights in self.weight_layers[layer_i].iter() {
-
-            // }
-
-            // let activations = &activation_layers[layer_i - 1] * &self.weight_layers[layer_i]
-            //     + &self.bias_layers[layer_i];
-            // println!("x {}", activations);
-
-            // for each perceptron's weights,
-
-            // let transfers =
-            //     Array2::from_shape_vec((self.layers[layer_i - 1], self.layers[layer_i]), layer_vec)
-            //         .unwrap()
-            //         * &self.weight_layers[layer_i]
-            //         + &self.bias_layers[layer_i];
 
             let previous_activations: &Array2<f32> = activation_layers.get(layer_i.saturating_sub(1)).unwrap_or(&inputs_array);
             // println!("previous_activations {}", previous_activations);
