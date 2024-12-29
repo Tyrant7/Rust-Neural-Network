@@ -11,7 +11,6 @@ use std::{
 use std::sync::mpsc::Sender;
 
 pub mod neural_network;
-pub mod utils;
 use ndarray::{array, Array2};
 
 use crate::neural_network::{NeuralNetwork, NEURAL_NETWORK_MANAGER};
@@ -39,8 +38,11 @@ pub fn main() {
 
     let mut network = create_network(
         Linear::new(20, 20), 
-        ReLU::new(), 
-        Linear::new(20, 3));
+        ReLU, 
+        Linear::new(20, 10),
+        Sigmoid,
+        Linear::new(10, 3),
+    );
 }
 
 pub fn init(input_count: usize, output_count: usize) -> NeuralNetwork {

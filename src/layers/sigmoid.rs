@@ -2,12 +2,6 @@ use crate::layer::Layer;
 
 pub struct Sigmoid;
 
-impl Sigmoid {
-    pub fn new() -> Self {
-        Sigmoid
-    }
-}
-
 impl Layer for Sigmoid {
     fn forward(&self, input: Vec<f32>) -> Vec<f32> {
         input.into_iter().map(|x| sigmoid(x)).collect()
