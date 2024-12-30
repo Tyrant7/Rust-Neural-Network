@@ -3,6 +3,10 @@ use ndarray::Array2;
 pub trait Layer {
     fn forward(&self, input: Array2<f32>) -> Array2<f32>;
     fn backward(&self, activations: Array2<f32>) -> Array2<f32>;
+    fn compute_bias_gradient(&self, activations: Array2<f32>) -> Array2<f32> {
+        // Some layers like activation functions won't have biases
+        activations
+    }
 }
 
 pub struct LayerShape {

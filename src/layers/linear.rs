@@ -1,4 +1,4 @@
-use ndarray::{Array2, Shape};
+use ndarray::{Array2, Axis, Shape};
 
 use crate::layer::{Layer, LayerShape};
 
@@ -25,5 +25,9 @@ impl Layer for Linear {
 
     fn backward(&self, activations: Array2<f32>) -> Array2<f32> {
         activations.dot(&self.weights.t())
+    }
+
+    fn compute_bias_gradient(&self, activations: Array2<f32>) -> Array2<f32> {
+        activations.sum_axis(Axis(1)).insert_axis(Axis(1))
     }
 }
