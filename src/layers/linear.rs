@@ -20,10 +20,10 @@ impl Linear {
 
 impl Layer for Linear {
     fn forward(&self, input: Array2<f32>) -> Array2<f32> {
-        input // TODO
+        self.weights.dot(&input) + &self.bias
     }
 
     fn backward(&self, activations: Array2<f32>) -> Array2<f32> {
-        Array2::from_elem((0, 0), 0.) // TODO
+        activations.dot(&self.weights.t())
     }
 }
