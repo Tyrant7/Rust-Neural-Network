@@ -19,11 +19,11 @@ impl Linear {
 }
 
 impl Layer for Linear {
-    fn forward(&self, input: Vec<f32>) -> Vec<f32> {
-        input
+    fn forward(&self, input: Array2<f32>) -> Array2<f32> {
+        input // TODO
     }
 
-    fn backward(&self, activations: Vec<f32>) -> Vec<f32> {
-        vec![] // TODO
+    fn backward(&self, activations: Array2<f32>) -> Array2<f32> {
+        Array2::from_elem((0, 0), 0.) // TODO
     }
 }

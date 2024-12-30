@@ -1,14 +1,16 @@
+use ndarray::Array2;
+
 use crate::layer::Layer;
 
 pub struct Sigmoid;
 
 impl Layer for Sigmoid {
-    fn forward(&self, input: Vec<f32>) -> Vec<f32> {
-        input.into_iter().map(|x| sigmoid(x)).collect()
+    fn forward(&self, input: Array2<f32>) -> Array2<f32> {
+        input.mapv(sigmoid)
     }
 
-    fn backward(&self, activations: Vec<f32>) -> Vec<f32> {
-        activations.into_iter().map(|x| sigmoid(x) * (1. - sigmoid(x))).collect()
+    fn backward(&self, activations: Array2<f32>) -> Array2<f32> {
+        activations.mapv(|x| sigmoid(x) * (1. - sigmoid(x)))
     }
 }
 

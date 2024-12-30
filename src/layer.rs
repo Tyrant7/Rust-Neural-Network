@@ -1,6 +1,8 @@
+use ndarray::Array2;
+
 pub trait Layer {
-    fn forward(&self, input: Vec<f32>) -> Vec<f32>;
-    fn backward(&self, activations: Vec<f32>) -> Vec<f32>;
+    fn forward(&self, input: Array2<f32>) -> Array2<f32>;
+    fn backward(&self, activations: Array2<f32>) -> Array2<f32>;
 }
 
 pub struct LayerShape {
