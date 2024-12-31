@@ -1,17 +1,19 @@
 use ndarray::{Array2, Axis, Shape};
 
-use crate::layer::Layer;
+use crate::layer::{ActivationFunction, Layer};
 
 pub struct Linear {
     weights: Array2<f32>,
     bias: Array2<f32>,
+    activation_function: ActivationFunction,
 }
 
 impl Linear {
-    pub fn new(input_shape: usize, output_shape: usize) -> Self {
+    pub fn new(input_shape: usize, output_shape: usize, activation_function: ActivationFunction) -> Self {
         Linear {
             weights: Array2::from_elem((output_shape, input_shape), 0.),
             bias: Array2::from_elem((input_shape, 1), 0.),
+            activation_function,
         }
     }
 
@@ -35,20 +37,10 @@ impl Linear {
 
         activations.dot(&self.weights.t())
     }
-
-    /*
-    pub fn input_shape(&self) -> usize {
-        self.weights.shape()[1]
-    }
-
-    pub fn output_shape(&self) -> usize {
-        self.weights.shape()[0]
-    }
-     */
 }
 
 impl Layer {
-    pub fn linear(input_size: usize, output_size: usize) -> Self {
-        Layer::Linear(Linear::new(input_size, output_size))
+    pub fn linear(input_size: usize, output_size: usize, activation_function: ActivationFunction) -> Self {
+        Layer::Linear(Linear::new(input_size, output_size, activation_function))
     }
 }
