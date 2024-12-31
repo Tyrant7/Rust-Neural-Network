@@ -36,25 +36,3 @@ impl Layer {
         }
     }
 }
-
-pub struct LayerShape {
-    pub input_shape: usize,
-    pub output_shape: usize,
-}
-
-impl LayerShape {
-    pub fn new(input_shape: usize, output_shape: usize) -> Self {
-        LayerShape {
-            input_shape,
-            output_shape,
-        }
-    }
-
-    pub fn input_shape(&self) -> usize {
-        self.input_shape
-    }
-
-    pub fn output_shape(&self) -> usize {
-        self.output_shape
-    }
-}
