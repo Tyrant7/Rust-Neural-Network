@@ -4,7 +4,6 @@ use std::sync::Mutex;
 use ndarray::prelude::*;
 use rand::Rng;
 
-use crate::layers::activation_functions::{relu, relu_derivative}
 extern crate rand;
 
 pub struct NeuralNetworkManager {
@@ -53,10 +52,8 @@ pub struct NeuralNetwork_Old {
 }
 
 impl NeuralNetwork_Old {
+    /*
     pub fn new(bias: f32, learning_rate: f32, layers: Vec<usize>) -> Self {
-        let weight_layers = Self::empty_weight_layers(&layers);
-        let bias_layers = Self::empty_bias_layers(&layers, bias);
-
         Self {
             weight_layers,
             bias_layers,
@@ -65,51 +62,7 @@ impl NeuralNetwork_Old {
             id: NEURAL_NETWORK_MANAGER.lock().unwrap().new_id(),
         }
     }
-
-    fn empty_weight_layers(layers: &[usize]) -> Vec<Array2<f32>> {
-        let mut weight_layers: Vec<Array2<f32>> = Vec::new();
-
-        // Input layers
-
-        // Hidden and output layers
-
-        for layer_i in 1..layers.len() {
-            let mut layer_vec = Vec::new();
-
-            // Previous layer perceptrons times current layer perceptrons
-            let weights_count = (layers[layer_i]) * layers[layer_i - 1];
-
-            for _ in 0..weights_count {
-                layer_vec.push(0.);
-            }
-
-            weight_layers.push(
-                Array2::from_shape_vec((layers[layer_i], layers[layer_i - 1]), layer_vec).unwrap(),
-            );
-        }
-
-        weight_layers
-    }
-
-    fn empty_bias_layers(layers: &[usize], bias: f32) -> Vec<Array2<f32>> {
-        let mut bias_layers: Vec<Array2<f32>> = Vec::new();
-
-        // Hidden and output layers
-
-        for perceptron_count in layers.iter().take(layers.len()).skip(1) {
-            let mut layer_vec = Vec::new();
-
-            for _ in 0..*perceptron_count {
-                layer_vec.push(bias);
-            }
-
-            bias_layers.push(
-                Array2::from_shape_vec((*perceptron_count, 1), layer_vec).unwrap(),
-            );
-        }
-
-        bias_layers
-    }
+     */
 
     /**
      * Randomly increases or decreases weights

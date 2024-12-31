@@ -66,6 +66,4 @@ impl NeuralNetwork {
         gradients.reverse();
         gradients
     }
-
-
 }
