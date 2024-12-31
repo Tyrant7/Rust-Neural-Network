@@ -1,11 +1,36 @@
 use ndarray::Array2;
 
-pub trait Layer {
-    fn forward(&self, input: Array2<f32>) -> Array2<f32>;
-    fn backward(&self, activations: Array2<f32>) -> Array2<f32>;
-    fn compute_bias_gradient(&self, activations: Array2<f32>) -> Array2<f32> {
-        // Some layers like activation functions won't have biases
-        activations
+use crate::layers::{linear::Linear, relu::ReLU, sigmoid::Sigmoid};
+
+pub enum Layer {
+    ReLU(ReLU),
+    Sigmoid(Sigmoid),
+    Linear(Linear),
+}
+
+impl Layer {
+    pub fn forward(&self, input: Array2<f32>) -> Array2<f32> {
+        match self {
+            Layer::ReLU(layer) => layer.forward(input),
+            Layer::Sigmoid(layer) => layer.forward(input),
+            Layer::Linear(layer) => layer.forward(input),
+        }
+    }
+
+    pub fn backward(&self, activations: Array2<f32>) -> Array2<f32> {
+        match self {
+            Layer::ReLU(layer) => layer.backward(activations),
+            Layer::Sigmoid(layer) => layer.backward(activations),
+            Layer::Linear(layer) => layer.backward(activations),
+        }
+    }
+
+    pub fn compute_bias_gradient(&self, activations: Array2<f32>) -> Array2<f32> {
+        match self {
+            Layer::Linear(layer) => layer.compute_bias_gradient(activations),
+            // Some layers like activation functions won't have biases
+            _ => activations
+        }
     }
 }
 
