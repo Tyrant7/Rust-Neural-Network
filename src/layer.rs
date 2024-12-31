@@ -12,7 +12,7 @@ pub enum Layer {
 }
 
 impl Layer {
-    pub fn forward(&self, input: Array2<f32>) -> Array2<f32> {
+    pub fn forward(&self, input: &Array2<f32>) -> Array2<f32> {
         match self {
             Layer::ReLU => relu(input),
             Layer::Sigmoid => sigmoid(input),
@@ -20,11 +20,23 @@ impl Layer {
         }
     }
 
-    pub fn backward(&self, activations: Array2<f32>) -> Array2<f32> {
+    pub fn backward(&self, activations: &Array2<f32>) -> Array2<f32> {
         match self {
             Layer::ReLU => relu_derivative(activations),
             Layer::Sigmoid => sigmoid_derivative(activations),
             Layer::Linear(layer) => layer.backward(activations),
         }
     }
+
+    /*
+    pub fn input_shape(&self) -> usize {
+        match self {
+            Layer::Linear(layer) => layer.input_shape()
+        }
+    }
+
+    pub fn output_shape(&self) -> usize {
+
+    }
+    */
 }

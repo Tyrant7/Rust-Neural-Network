@@ -29,9 +29,9 @@ pub fn main() {
     let mut network = NeuralNetwork::new(vec![
         Layer::linear(20, 20),
         Layer::ReLU, 
-        Layer::linear(20, 20),
+        Layer::linear(20, 10),
         Layer::Sigmoid,
-        Layer::linear(20, 20),
+        Layer::linear(10, 3),
     ]);
 }
 

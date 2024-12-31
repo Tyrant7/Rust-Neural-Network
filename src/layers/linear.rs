@@ -15,11 +15,11 @@ impl Linear {
         }
     }
 
-    pub fn forward(&self, input: Array2<f32>) -> Array2<f32> {
-        self.weights.dot(&input) + &self.bias
+    pub fn forward(&self, input: &Array2<f32>) -> Array2<f32> {
+        self.weights.dot(input) + &self.bias
     }
 
-    pub fn backward(&self, activations: Array2<f32>) -> Array2<f32> {
+    pub fn backward(&self, activations: &Array2<f32>) -> Array2<f32> {
 
         // TODO: save the changes made here
         // currently weights are being passed in reverse through the network, 
@@ -35,6 +35,16 @@ impl Linear {
 
         activations.dot(&self.weights.t())
     }
+
+    /*
+    pub fn input_shape(&self) -> usize {
+        self.weights.shape()[1]
+    }
+
+    pub fn output_shape(&self) -> usize {
+        self.weights.shape()[0]
+    }
+     */
 }
 
 impl Layer {
