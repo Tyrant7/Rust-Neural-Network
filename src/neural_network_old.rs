@@ -4,7 +4,7 @@ use std::sync::Mutex;
 use ndarray::prelude::*;
 use rand::Rng;
 
-use crate::utils::{relu, relu_derivative};
+use crate::layers::activation_functions::{relu, relu_derivative}
 extern crate rand;
 
 pub struct NeuralNetworkManager {

@@ -1,7 +1,7 @@
 use ndarray::Array2;
 
 use crate::layers::{
-    activation_functions::activation_functions::{relu, relu_derivative, sigmoid, sigmoid_derivative}, 
+    activation_functions::{relu, relu_derivative, sigmoid, sigmoid_derivative}, 
     linear::Linear
 };
 

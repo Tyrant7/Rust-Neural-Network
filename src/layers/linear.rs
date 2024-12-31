@@ -29,6 +29,10 @@ impl Linear {
         // let weight_gradient = activations.dot(&input.t());
         // let bias_gradient = activations.sum_axis(Axis(1)).insert_axis(Axis(1))
 
+        // ON SECOND THOUGHT
+        // We'll return the input, output, and bias gradients and update using an optimizer
+        // outside of this method in the network itself. I think that would work better
+
         activations.dot(&self.weights.t())
     }
 }
