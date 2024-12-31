@@ -13,54 +13,53 @@ impl NeuralNetwork {
         }
     }
 
-    pub fn forward_propagate(&self, inputs: Vec<f32>) -> Vec<Array2<f32>> {
+    pub fn forward(&self, inputs: Vec<f32>) -> Vec<Array2<f32>> {
 
-        // Turn our inputs into a matrix of the same size to fit our network's input shape (assume length matches)
+        // Track each layer of activations through the network, this is what we'll be returning
+        // In this case, the last layer of activations represents the network's output
+        let mut activation_layers: Vec<Array2<f32>> = Vec::new();
+
+        // Construct our input array, assume shape matches network shape
         let inputs_array = Array2::from_shape_vec((inputs.len(), 1), inputs).unwrap();
-        
-        // Track each layer, here activation functions are also considered their own layer
-        let mut forward_passes: Vec<Array2<f32>> = Vec::new();
+
         for layer_i in 0..self.layers.len() - 1 {
-            
-            // We're going to get our last layer's output
-            let previous_pass= forward_passes.get(layer_i.saturating_sub(1)).unwrap_or(&inputs_array);
 
-            // And feed it into the next layer
-            let transfers = self.layers[layer_i].forward(previous_pass);
+            // Get the input to the current layer, whatever came last
+            let previous_activations: &Array2<f32> = activation_layers.get(layer_i.saturating_sub(1)).unwrap_or(&inputs_array);
 
-            // Save it here as the input for the next layer
-            forward_passes.push(transfers);
+            // Forward through the current layer
+            let activations = self.layers[layer_i].forward(previous_activations);
+
+            // Push to the stack for next layer
+            activation_layers.push(activations);
         }
 
-        forward_passes
+        activation_layers
     }
 
-    pub fn backward(&self, activation_layers: &[Array2<f32>], target: &Array2<f32>) -> Vec<Array2<f32>> {
-        
-        // Define our gradients for each layer
+    pub fn backwards(&mut self, activation_layers: &[Array2<f32>], target: &Array2<f32>) -> Vec<Array2<f32>> {
+
+        // Define our gradients for each layer, this is what we'll be returning
         let mut gradients = Vec::new();
 
-        // Caluclate the error at the output layer
+        // Calculate the error at the output layer
         let final_output = activation_layers.last().unwrap();
         let error = final_output - target;
 
-        // Compute the gradients for the output layer
-        // let output_gradient = &error * final_output.mapv();
-        // gradients.push(output_gradient.clone());
+        // Compute each gradient for the output layer
+        let output_gradient = &error * self.layers.last().unwrap().backward(final_output);
+        gradients.push(output_gradient);
 
-        // Propagate backward through the hidden layers
-        let mut last_gradient = output_gradient; 
+        let mut last_gradient = output_gradient;
         for layer_i in (0..activation_layers.len() - 1).rev() {
             let activations = &activation_layers[layer_i];
-            // let weights = &self.layers[layer_i].weights;
+            let layer = self.layers[layer_i];
 
-            
+            let propagated_error = layer.backward(&last_gradient);
+            layer.backward(activations);
         }
 
-        vec![]
-    }
-
-    pub fn backwards_propagate(&mut self, activation_layers: &[Array2<f32>], target: &Array2<f32>) -> Vec<Array2<f32>> {
+        //
 
 
         // Backpropagate through the hidden layers
@@ -93,5 +92,6 @@ impl NeuralNetwork {
         gradients.reverse();
         gradients
     }
+
 
 }
