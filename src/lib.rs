@@ -19,7 +19,7 @@ use crate::neural_network_old::{NeuralNetwork_Old, NEURAL_NETWORK_MANAGER};
 pub mod layer;
 pub mod layers;
 use layers::linear::Linear;
-use layers::relu::ReLU;
+use layers::activation_functions::ReLU;
 use layers::sigmoid::Sigmoid;
 
 pub mod neural_network;
@@ -41,11 +41,11 @@ pub fn main() {
 
 
     let mut network = create_network(vec![
-        Linear::new(20, 20), 
-        ReLU, 
-        Linear::new(20, 10),
-        Sigmoid,
-        Linear::new(10, 3),
+        Layer::Linear(Linear::new(20, 20)), 
+        Layer::ReLU(ReLU), 
+        Layer::Linear(Linear::new(20, 10)),
+        Layer::Sigmoid(Sigmoid),
+        Layer::Linear(Linear::new(10, 3)),
     ]);
 }
 

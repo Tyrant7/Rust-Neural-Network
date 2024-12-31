@@ -1,26 +1,29 @@
 use ndarray::Array2;
 
-use crate::layers::{linear::Linear, relu::ReLU, sigmoid::Sigmoid};
+use crate::layers::{
+    activation_functions::activation_functions::{relu, relu_derivative, sigmoid, sigmoid_derivative}, 
+    linear::Linear
+};
 
 pub enum Layer {
-    ReLU(ReLU),
-    Sigmoid(Sigmoid),
+    ReLU,
+    Sigmoid,
     Linear(Linear),
 }
 
 impl Layer {
     pub fn forward(&self, input: Array2<f32>) -> Array2<f32> {
         match self {
-            Layer::ReLU(layer) => layer.forward(input),
-            Layer::Sigmoid(layer) => layer.forward(input),
+            Layer::ReLU => relu(input),
+            Layer::Sigmoid => sigmoid(input),
             Layer::Linear(layer) => layer.forward(input),
         }
     }
 
     pub fn backward(&self, activations: Array2<f32>) -> Array2<f32> {
         match self {
-            Layer::ReLU(layer) => layer.backward(activations),
-            Layer::Sigmoid(layer) => layer.backward(activations),
+            Layer::ReLU => relu_derivative(activations),
+            Layer::Sigmoid => sigmoid_derivative(activations),
             Layer::Linear(layer) => layer.backward(activations),
         }
     }

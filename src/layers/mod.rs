@@ -1,6 +1,2 @@
-// Activation functions
-pub mod relu;
-pub mod sigmoid;
-
-// Sized layer types
+pub mod activation_functions;
 pub mod linear;
