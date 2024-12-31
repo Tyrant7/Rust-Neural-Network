@@ -18,7 +18,7 @@ use crate::neural_network_old::{NeuralNetwork_Old, NEURAL_NETWORK_MANAGER};
 
 pub mod layer;
 pub mod layers;
-use layers::{activation_functions::{relu, relu_derivative, sigmoid, sigmoid_derivative}, linear::Linear};
+use layers::{linear::Linear, activation_functions::ActivationFunction::{ReLU, Sigmoid}};
 
 pub mod neural_network;
 use neural_network::NeuralNetwork;
@@ -27,9 +27,9 @@ const TICK_SPEED: u32 = 1;
 
 pub fn main() {
     let mut network = NeuralNetwork::new(vec![
-        Layer::linear(20, 20, relu, relu_derivative),
-        Layer::linear(20, 10, sigmoid, sigmoid_derivative),
-        Layer::linear(10, 3, relu, relu_derivative),
+        Layer::linear(20, 20, ReLU),
+        Layer::linear(20, 10, Sigmoid),
+        Layer::linear(10, 3, ReLU),
     ]); 
 }
 

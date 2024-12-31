@@ -1,11 +1,6 @@
 use ndarray::Array2;
 
-use crate::layers::{
-    activation_functions::{relu, relu_derivative, sigmoid, sigmoid_derivative}, 
-    linear::Linear
-};
-
-pub type ActivationFunction = fn(input: &Array2<f32>) -> Array2<f32>;
+use crate::layers::linear::Linear;
 
 pub enum Layer {
     Linear(Linear),

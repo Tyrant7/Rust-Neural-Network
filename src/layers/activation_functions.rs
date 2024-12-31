@@ -1,19 +1,24 @@
 use ndarray::Array2;
 
-pub fn relu(input: &Array2<f32>) -> Array2<f32> {
-    input.mapv(|x| x.max(0.))        
+pub enum ActivationFunction {
+    ReLU,
+    Sigmoid,
 }
 
-pub fn relu_derivative(activations: &Array2<f32>) -> Array2<f32> {
-    activations.mapv(|x| if x > 0. { 1. } else { 0. })
-}
+impl ActivationFunction {
+    pub fn plain(&self, input: &Array2<f32>) -> Array2<f32> {
+        match self {
+            ActivationFunction::ReLU => input.mapv(|x| x.max(0.)),
+            ActivationFunction::Sigmoid => input.mapv(sigmoid_internal),
+        }
+    }
 
-pub fn sigmoid(input: &Array2<f32>) -> Array2<f32> {
-    input.mapv(sigmoid_internal)
-}
-
-pub fn sigmoid_derivative(activations: &Array2<f32>) -> Array2<f32> {
-    activations.mapv(|x| sigmoid_internal(x) * (1. - sigmoid_internal(x)))
+    pub fn derivative(&self, input: &Array2<f32>) -> Array2<f32> {
+        match self {
+            ActivationFunction::ReLU => input.mapv(|x| if x > 0. { 1. } else { 0. }),
+            ActivationFunction::Sigmoid => input.mapv(|x| sigmoid_internal(x) * (1. - sigmoid_internal(x))),
+        }
+    }
 }
 
 fn sigmoid_internal(x: f32) -> f32 {
