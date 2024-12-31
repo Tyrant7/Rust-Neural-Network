@@ -27,12 +27,4 @@ impl Layer {
             Layer::Linear(layer) => layer.backward(activations),
         }
     }
-
-    pub fn compute_bias_gradient(&self, activations: Array2<f32>) -> Array2<f32> {
-        match self {
-            Layer::Linear(layer) => layer.compute_bias_gradient(activations),
-            // Some layers like activation functions won't have biases
-            _ => activations
-        }
-    }
 }

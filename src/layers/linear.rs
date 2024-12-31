@@ -20,11 +20,16 @@ impl Linear {
     }
 
     pub fn backward(&self, activations: Array2<f32>) -> Array2<f32> {
-        activations.dot(&self.weights.t())
-    }
 
-    pub fn compute_bias_gradient(&self, activations: Array2<f32>) -> Array2<f32> {
-        activations.sum_axis(Axis(1)).insert_axis(Axis(1))
+        // TODO: save the changes made here
+        // currently weights are being passed in reverse through the network, 
+        // but intermediate steps are not saved
+        // we'll need to save these intermediate values somewhere for the optimizer to use
+
+        // let weight_gradient = activations.dot(&input.t());
+        // let bias_gradient = activations.sum_axis(Axis(1)).insert_axis(Axis(1))
+
+        activations.dot(&self.weights.t())
     }
 }
 
