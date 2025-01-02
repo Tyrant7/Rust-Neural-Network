@@ -19,7 +19,7 @@ impl NeuralNetwork {
         // In this case, the last layer of activations represents the network's output
         let mut activation_layers: Vec<Array2<f32>> = Vec::new();
 
-        // Construct our input array, assume shape matches network shape
+        // Construct our input array, assume shape matches network input shape
         let inputs_array = Array2::from_shape_vec((inputs.len(), 1), inputs).unwrap();
 
         for layer_i in 0..self.layers.len() - 1 {
@@ -37,7 +37,7 @@ impl NeuralNetwork {
         activation_layers
     }
 
-    pub fn backwards(&mut self, activation_layers: &[Array2<f32>], target: &Array2<f32>) -> Vec<(Array2<f32>, Array2<f32>)> {
+    pub fn backwards(&mut self, activation_layers: &[Array2<f32>], targets: Vec<f32>) -> Vec<(Array2<f32>, Array2<f32>)> {
 
         // Define our gradients for each layer, this is what we'll be returning
         let mut gradients = Vec::new();
@@ -45,8 +45,11 @@ impl NeuralNetwork {
         // Calculate the error at the output layer
         let final_output = activation_layers.last().unwrap();
 
+        // Construct our targets array, assume shape matches network output shape
+        let targets_array = Array2::from_shape_vec((targets.len(), 1), targets).unwrap();
+
         // TODO: loss functions
-        let error = final_output - target;
+        let error = final_output - targets_array;
 
         // Propagate backwards over all layers, skipping the input layer
         let mut output_gradient = error;

@@ -1,4 +1,6 @@
 pub mod layer;
+use std::vec;
+
 use layer::Layer;
 
 pub mod layers;
@@ -11,12 +13,37 @@ const TICK_SPEED: u32 = 1;
 
 pub fn main() {
     let mut network = NeuralNetwork::new(vec![
-        Layer::linear(20, 20, ReLU),
-        Layer::linear(20, 10, Sigmoid),
-        Layer::linear(10, 3, ReLU),
+        Layer::linear(4, 4, ReLU),
+        Layer::linear(4, 2, Sigmoid),
+        Layer::linear(2, 1, ReLU),
     ]); 
 
-    println!("It runs!");
+    let inputs: Vec<f32> = vec![0., 0., 0., 0.];
+    let targets: Vec<f32> = vec![1., 1., 1., 1.];
+
+    println!("Data initialized:");
+    println!("inputs:");
+    println!("{:?}", inputs);
+    println!("targets:");
+    println!("{:?}", targets);
+
+    let activations = network.forward(inputs);
+
+    println!("Activations:");
+    println!("{:?}", activations);
+    
+    println!("output:");
+    println!("{:?}", activations.last().unwrap());
+    println!("targets:");
+    println!("{:?}", targets);
+
+    let gradients = network.backwards(&activations, targets);
+
+    println!("Gradients:");
+    println!("{:?}", gradients);
+
+
+    println!("Analysis complete!");
 }
 
 
