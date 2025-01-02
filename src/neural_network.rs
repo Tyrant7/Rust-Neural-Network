@@ -53,7 +53,7 @@ impl NeuralNetwork {
 
         // Propagate backwards over all layers, skipping the input layer
         let mut output_gradient = error;
-        for layer_i in (1..self.layers.len()).rev() {
+        for layer_i in (0..self.layers.len()).rev() {
             let layer = &self.layers[layer_i];
             let activation = &activation_layers[layer_i];
 

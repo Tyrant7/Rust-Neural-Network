@@ -1,5 +1,4 @@
-use ndarray::{Array2, Axis, Shape};
-use rand::Rng;
+use ndarray::{Array2, Axis};
 
 use crate::layer::Layer;
 use super::activation_functions::ActivationFunction;
@@ -36,8 +35,6 @@ impl Linear {
         // Compute gradients for weights and biases, these will be passed as 'out' parameters
         *weight_gradient = delta.dot(&activation.t());
         *bias_gradient = delta.sum_axis(Axis(1)).insert_axis(Axis(1));
-
-        let output = self.weights.t().dot(&delta);
 
         // Compute the input gradient to propagate backward
         self.weights.t().dot(&delta)

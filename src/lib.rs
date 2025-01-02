@@ -9,8 +9,6 @@ use layers::activation_functions::ActivationFunction::{ReLU, Sigmoid};
 pub mod neural_network;
 use neural_network::NeuralNetwork;
 
-const TICK_SPEED: u32 = 1;
-
 pub fn main() {
     let mut network = NeuralNetwork::new(vec![
         Layer::linear(4, 4, ReLU),
@@ -40,7 +38,7 @@ pub fn main() {
     let gradients = network.backwards(&activations, vec![target]);
 
     println!("Gradients:");
-    println!("{:?}", gradients);
+    println!("{:#?}", gradients);
 
 
     println!("\nAnalysis complete!");
