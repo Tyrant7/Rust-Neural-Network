@@ -1,24 +1,8 @@
-#![allow(unused_imports)]
-#![allow(dead_code)]
-
-use std::{
-    borrow::Borrow,
-    collections::HashMap,
-    time::{Duration, Instant},
-    vec,
-};
-
-use std::sync::mpsc::Sender;
-
-pub mod neural_network_old;
-use layer::Layer;
-use ndarray::{array, Array2};
-
-use crate::neural_network_old::{NeuralNetwork_Old, NEURAL_NETWORK_MANAGER};
-
 pub mod layer;
+use layer::Layer;
+
 pub mod layers;
-use layers::{linear::Linear, activation_functions::ActivationFunction::{ReLU, Sigmoid}};
+use layers::activation_functions::ActivationFunction::{ReLU, Sigmoid};
 
 pub mod neural_network;
 use neural_network::NeuralNetwork;
@@ -31,6 +15,8 @@ pub fn main() {
         Layer::linear(20, 10, Sigmoid),
         Layer::linear(10, 3, ReLU),
     ]); 
+
+    println!("It runs!");
 }
 
 
