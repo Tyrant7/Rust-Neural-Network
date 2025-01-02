@@ -16,16 +16,14 @@ pub fn main() {
         Layer::linear(4, 4, ReLU),
         Layer::linear(4, 2, Sigmoid),
         Layer::linear(2, 1, ReLU),
-    ]); 
+    ]);
 
     let inputs: Vec<f32> = vec![0., 0., 0., 0.];
-    let targets: Vec<f32> = vec![1., 1., 1., 1.];
+    let target: f32 = 1.;
 
     println!("\nData initialized:");
     println!("inputs:");
     println!("{:?}", inputs);
-    println!("targets:");
-    println!("{:?}", targets);
 
     let activations = network.forward(inputs);
 
@@ -34,12 +32,12 @@ pub fn main() {
     
     println!("output:");
     println!("{:?}", activations.last().unwrap());
-    println!("targets:");
-    println!("{:?}", targets);
+    println!("target:");
+    println!("{}", target);
 
     println!("\nBeginning backward pass...");
 
-    let gradients = network.backwards(&activations, targets);
+    let gradients = network.backwards(&activations, vec![target]);
 
     println!("Gradients:");
     println!("{:?}", gradients);

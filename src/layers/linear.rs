@@ -28,20 +28,36 @@ impl Linear {
     }
 
     pub fn backward(&self, 
-        input: &Array2<f32>, 
+        activation: &Array2<f32>, 
         output_gradient: &Array2<f32>, 
         weight_gradient: &mut Array2<f32>, 
         bias_gradient: &mut Array2<f32>
     ) -> Array2<f32> {
+
+        println!("input shape: {:?}", activation.shape());
+        println!("output shape: {:?}", output_gradient.shape());
+
+        println!("weights shape: {:?}", self.weights.shape());
+
         // Compute the derivative of the activation function then combine with the output gradient to get the delta
-        let delta = output_gradient * self.activation_function.derivative(input);
+        let delta = output_gradient * self.activation_function.derivative(activation);
+
+        println!("Delta shape: {:?}", delta.shape());
 
         // Compute gradients for weights and biases, these will be passed as 'out' parameters
-        *weight_gradient = delta.dot(&input.t());
+        *weight_gradient = delta.dot(&activation.t());
         *bias_gradient = delta.sum_axis(Axis(1)).insert_axis(Axis(1));
 
+        println!("Weight gradient shape: {:?}", weight_gradient.shape());
+
+        println!("Delta with shape {:?} against weights with shape {:?}", delta.shape(), self.weights.t().shape());
+
+        let output = self.weights.t().dot(&delta);
+
+        println!("Output shape: {:?}", output.shape());
+
         // Compute the input gradient to propagate backward
-        delta.dot(&self.weights.t())
+        self.weights.t().dot(&delta)
     }
 }
 

@@ -55,7 +55,7 @@ impl NeuralNetwork {
         let mut output_gradient = error;
         for layer_i in (1..self.layers.len()).rev() {
             let layer = &self.layers[layer_i];
-            let activation = &activation_layers[layer_i - 1];
+            let activation = &activation_layers[layer_i];
 
             // While 'out' parameters are ugly here, they should have a fair performance gain
             // TODO: Test if that is entirely true
