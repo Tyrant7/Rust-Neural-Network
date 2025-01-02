@@ -21,7 +21,7 @@ pub fn main() {
     let inputs: Vec<f32> = vec![0., 0., 0., 0.];
     let targets: Vec<f32> = vec![1., 1., 1., 1.];
 
-    println!("Data initialized:");
+    println!("\nData initialized:");
     println!("inputs:");
     println!("{:?}", inputs);
     println!("targets:");
@@ -29,7 +29,7 @@ pub fn main() {
 
     let activations = network.forward(inputs);
 
-    println!("Activations:");
+    println!("\nActivations:");
     println!("{:?}", activations);
     
     println!("output:");
@@ -37,13 +37,15 @@ pub fn main() {
     println!("targets:");
     println!("{:?}", targets);
 
+    println!("\nBeginning backward pass...");
+
     let gradients = network.backwards(&activations, targets);
 
     println!("Gradients:");
     println!("{:?}", gradients);
 
 
-    println!("Analysis complete!");
+    println!("\nAnalysis complete!");
 }
 
 

@@ -22,7 +22,7 @@ impl NeuralNetwork {
         // Construct our input array, assume shape matches network input shape
         let inputs_array = Array2::from_shape_vec((inputs.len(), 1), inputs).unwrap();
 
-        for layer_i in 0..self.layers.len() - 1 {
+        for layer_i in 0..self.layers.len() {
 
             // Get the input to the current layer, whatever came last
             let previous_activations: &Array2<f32> = activation_layers.get(layer_i.saturating_sub(1)).unwrap_or(&inputs_array);
