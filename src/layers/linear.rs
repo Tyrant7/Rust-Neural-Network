@@ -13,13 +13,18 @@ impl Linear {
     pub fn new(input_shape: usize, output_shape: usize, activation_function: ActivationFunction) -> Self {
         Linear {
             weights: Array2::from_elem((output_shape, input_shape), 0.),
-            bias: Array2::from_elem((input_shape, 1), 0.),
+            bias: Array2::from_elem((output_shape, 1), 0.),
             activation_function,
         }
     }
 
     pub fn forward(&self, input: &Array2<f32>) -> Array2<f32> {
-        self.activation_function.plain(&(self.weights.dot(input) + &self.bias))
+        println!("About to multiply input with shape {:?} against weights with shape {:?}", input.shape(), self.weights.shape());
+
+        let output = self.activation_function.plain(&(self.weights.dot(input) + &self.bias));
+
+        println!("New shape: {:?}", output.shape());
+        output
     }
 
     pub fn backward(&self, 
