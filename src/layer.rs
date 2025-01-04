@@ -22,4 +22,10 @@ impl Layer {
             Layer::Linear(layer) => layer.backward(input, output_gradient, weight_gradient, bias_gradient),
         }
     }
+
+    pub fn get_params_mut(&mut self) -> (&mut Array2<f32>, &mut Array2<f32>) {
+        match self {
+            Layer::Linear(layer) => layer.get_params_mut(),
+        }
+    }
 }

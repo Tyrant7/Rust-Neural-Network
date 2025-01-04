@@ -69,4 +69,12 @@ impl NeuralNetwork {
         gradients.reverse();
         gradients
     }
+
+    pub fn get_layers(&self) -> &[Layer] {
+        &self.layers
+    }
+
+    pub fn get_layers_mut(&mut self) -> &mut [Layer] {
+        &mut self.layers
+    }
 }

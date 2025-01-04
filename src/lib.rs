@@ -14,7 +14,8 @@ pub mod neural_network;
 use neural_network::NeuralNetwork;
 
 pub mod optimizers;
-use optimizers::sgd;
+use optimizer::Optimizer;
+use optimizers::sgd::{self, SGD};
 
 pub fn main() {
     let mut network = NeuralNetwork::new(vec![
@@ -47,6 +48,9 @@ pub fn main() {
     println!("Gradients:");
     println!("{:#?}", gradients);
 
+    println!("Optimizing gradients using SGD...");
+    let mut optimizer = SGD { learning_rate: 0.001 };
+    optimizer.update(&mut network, &gradients);
 
     println!("\nAnalysis complete!");
 }

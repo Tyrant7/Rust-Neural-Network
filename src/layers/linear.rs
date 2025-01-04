@@ -47,6 +47,14 @@ impl Linear {
         // Compute the input gradient to propagate backward
         self.weights.t().dot(&delta)
     }
+
+    pub fn get_params(&self) -> (&Array2<f32>, &Array2<f32>) {
+        (&self.weights, &self.bias)
+    }
+
+    pub fn get_params_mut(&mut self) -> (&mut Array2<f32>, &mut Array2<f32>) {
+        (&mut self.weights, &mut self.bias)
+    } 
 }
 
 impl Layer {
