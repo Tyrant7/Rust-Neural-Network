@@ -6,7 +6,9 @@ pub mod optimizer;
 use layer::Layer;
 
 pub mod layers;
-use layers::activation_functions::ActivationFunction::{ReLU, Sigmoid};
+pub mod activation_functions;
+
+use activation_functions::ActivationFunction::{ReLU, Sigmoid};
 
 pub mod neural_network;
 use neural_network::NeuralNetwork;

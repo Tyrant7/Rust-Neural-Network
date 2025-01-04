@@ -1,8 +1,7 @@
 use ndarray::{Array2, Axis};
 use rand::Rng;
 
-use crate::layer::Layer;
-use super::activation_functions::ActivationFunction;
+use crate::{activation_functions::ActivationFunction, layer::Layer};
 
 pub struct Linear {
     weights: Array2<f32>,
