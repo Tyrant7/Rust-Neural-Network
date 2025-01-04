@@ -1,5 +1,7 @@
-pub mod layer;
 use std::vec;
+
+pub mod layer;
+pub mod optimizer;
 
 use layer::Layer;
 
@@ -8,6 +10,9 @@ use layers::activation_functions::ActivationFunction::{ReLU, Sigmoid};
 
 pub mod neural_network;
 use neural_network::NeuralNetwork;
+
+pub mod optimizers;
+use optimizers::sgd;
 
 pub fn main() {
     let mut network = NeuralNetwork::new(vec![
