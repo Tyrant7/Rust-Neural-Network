@@ -48,7 +48,7 @@ pub fn main() {
     println!("Gradients:");
     println!("{:#?}", gradients);
 
-    println!("Optimizing gradients using SGD...");
+    println!("Optimizing gradients...");
     let mut optimizer = SGD { learning_rate: 0.001 };
     optimizer.update(&mut network, &gradients);
 
