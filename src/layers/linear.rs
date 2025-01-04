@@ -1,4 +1,5 @@
 use ndarray::{Array2, Axis};
+use rand::Rng;
 
 use crate::layer::Layer;
 use super::activation_functions::ActivationFunction;
@@ -11,10 +12,18 @@ pub struct Linear {
 
 impl Linear {
     pub fn new(input_shape: usize, output_shape: usize, activation_function: ActivationFunction) -> Self {
-        // TODO: populate weights and biases with random values between 0 and 1
         Linear {
-            weights: Array2::from_elem((output_shape, input_shape), 0.5),
-            bias: Array2::from_elem((output_shape, 1), 0.5),
+            weights: Array2::from_elem((output_shape, input_shape), 0.),
+            bias: Array2::from_elem((output_shape, 1), 0.),
+            activation_function,
+        }
+    }
+
+    pub fn new_from_rand(input_shape: usize, output_shape: usize, activation_function: ActivationFunction) -> Self {
+        let mut rng = rand::thread_rng();
+        Linear {
+            weights: Array2::from_shape_fn((output_shape, input_shape), |(_i, _j)| rng.gen_range(0., 1.)),
+            bias: Array2::from_shape_fn((output_shape, 1), |(_i, _j)| rng.gen_range(0., 1.)),
             activation_function,
         }
     }
@@ -43,6 +52,6 @@ impl Linear {
 
 impl Layer {
     pub fn linear(input_size: usize, output_size: usize, activation_function: ActivationFunction) -> Self {
-        Layer::Linear(Linear::new(input_size, output_size, activation_function))
+        Layer::Linear(Linear::new_from_rand(input_size, output_size, activation_function))
     }
 }
