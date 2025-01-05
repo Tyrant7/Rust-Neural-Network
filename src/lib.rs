@@ -40,9 +40,12 @@ pub fn test_xor() {
 
     println!("Beginning training a network to solve XOR problem....");
 
-    for i in 0..10 {
+    for generation in 0..10 {
         let mut generation_error = 0.;
 
+        // Accumulate gradients for a whole generation before applying any changes to network parameters
+        let mut gen_grads: Vec<(Array2<f32>, Array2<f32>)> = vec![];
+        
         for (inputs, expected) in train_data.iter() {
             let activations = network.forward(Vec::from(inputs));
             let gradients = network.backwards(&activations, Vec::from(expected));
@@ -52,11 +55,22 @@ pub fn test_xor() {
             let targets_array = Array2::from_shape_fn((expected.len(), 1), |(j, _k)| expected[j]);
             generation_error += (final_output - targets_array).abs().sum();
 
-            optimizer.update(&mut network, &gradients);
+            for (layer_i, (weights, biases)) in gradients.iter().enumerate() {
+                let accumulate= gen_grads.get_mut(layer_i).unwrap_or((
+                    Array2::from_elem(weights.shape(), 0), 
+                    Array2::from_elem(biases.shape(), 0)
+                ));
+
+                accumulate.0 += weights;
+                accumulate.1 += biases;
+            }
         }
 
+        // Optimize parameters
+        optimizer.update(&mut network, &gen_grads);
+
         generation_error /= train_data.len() as f32;
-        println!("Generation {} error: {}", i, generation_error);
+        println!("Generation {} error: {}", generation, generation_error);
     }
 }
 
