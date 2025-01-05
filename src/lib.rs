@@ -28,7 +28,7 @@ pub fn test_xor() {
         Layer::linear(2, 1, ReLU),
     ]);
 
-    let mut optimizer = SGD { learning_rate: 0.001 };
+    let mut optimizer = SGD { learning_rate: 0.01 };
 
     // All inputs of XOR matched to their respective outputs
     let train_data = [
@@ -40,7 +40,7 @@ pub fn test_xor() {
 
     println!("Beginning training a network to solve XOR problem....");
 
-    for i in (0..5) {
+    for i in 0..10 {
         let mut generation_error = 0.;
 
         for (inputs, expected) in train_data.iter() {
