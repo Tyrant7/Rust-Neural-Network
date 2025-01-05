@@ -40,9 +40,8 @@ pub fn test_xor() {
 
     println!("Beginning training a network to solve XOR problem....");
 
-    let GENERATIONS = 50;
-    for i in (0..GENERATIONS) {
-        let mut generation_error = 0;
+    for i in (0..5) {
+        let mut generation_error = 0.;
 
         for (inputs, expected) in train_data.iter() {
             let activations = network.forward(Vec::from(inputs));
@@ -51,12 +50,12 @@ pub fn test_xor() {
             // Calculate mean absolute error for analysis
             let final_output = activations.last().unwrap();
             let targets_array = Array2::from_shape_fn((expected.len(), 1), |(j, _k)| expected[j]);
-            generation_error += (final_output - targets_array).abs();
+            generation_error += (final_output - targets_array).abs().sum();
 
             optimizer.update(&mut network, &gradients);
         }
 
-        generation_error /= train_data.len();
+        generation_error /= train_data.len() as f32;
         println!("Generation {} error: {}", i, generation_error);
     }
 }
