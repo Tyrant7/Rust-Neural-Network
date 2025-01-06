@@ -49,7 +49,6 @@ pub fn test_xor() {
         for layer in network.layers.iter() {
             match layer {
                 Layer::Linear(linear) => {
-                    println!("forward weights shape {:?}", linear.weights.shape());
 
                     gen_grads.push((
                         Array2::from_elem(linear.weights.raw_dim(), 0.),
@@ -76,8 +75,6 @@ pub fn test_xor() {
             for (layer_i, (weights, biases)) in gradients.iter().enumerate() {
 
                 let layer_batch_grads = &mut gen_grads[layer_i];
-
-                println!("shape grad weights {:?}", weights.shape());
 
                 layer_batch_grads.0 += weights;
                 layer_batch_grads.1 += biases;

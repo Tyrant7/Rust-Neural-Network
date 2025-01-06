@@ -35,7 +35,7 @@ impl NeuralNetwork {
     }
 
     pub fn backwards(&mut self, activation_layers: &[Array2<f32>], inputs: &Array2<f32>, targets: Vec<f32>) -> Vec<(Array2<f32>, Array2<f32>)> {
-        println!("last act shape {:?}", activation_layers.last().unwrap().shape());
+        
         // Define our gradients for each layer, this is what we'll be returning
         let mut gradients = Vec::new();
 
@@ -61,8 +61,6 @@ impl NeuralNetwork {
                 // We are on the input layer, provide the inputs
                 true => inputs,
             };
-
-            println!("output grad shape {:?}", output_gradient.shape());
 
             let (new_gradient, weight_gradient, bias_gradient) = layer.backward(activations, &output_gradient);
             output_gradient = new_gradient;
