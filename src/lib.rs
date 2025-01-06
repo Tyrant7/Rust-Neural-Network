@@ -27,7 +27,7 @@ pub fn test_xor() {
         NeuralNetwork::new(vec![Layer::linear(2, 2, ReLU),  Layer::linear(2, 1, ReLU)]);
 
     let mut optimizer = SGD {
-        learning_rate: 0.01,
+        learning_rate: 0.001,
     };
 
     // All inputs of XOR matched to their respective outputs
@@ -40,7 +40,7 @@ pub fn test_xor() {
 
     println!("Beginning training a network to solve XOR problem....");
 
-    for generation in 0..10000 {
+    for generation in 0..1000 {
         let mut generation_error = 0.;
 
         // Accumulate gradients for a whole generation before applying any changes to network parameters
@@ -69,8 +69,9 @@ pub fn test_xor() {
             let final_output = activations.last().unwrap();
             println!("output {} target {}", final_output.first().unwrap(), expected[0]);
             let targets_array = Array2::from_shape_fn((expected.len(), 1), |(j, _k)| expected[j]);
-            generation_error += (final_output - targets_array).abs().sum();
-            println!("error {generation_error}");
+            generation_error += (final_output - &targets_array).abs().sum();
+
+            println!("gen error: {}", generation_error);
 
             for (layer_i, (weights, biases)) in gradients.iter().enumerate() {
 

@@ -21,8 +21,8 @@ impl Linear {
     pub fn new_from_rand(input_shape: usize, output_shape: usize, activation_function: ActivationFunction) -> Self {
         let mut rng = rand::thread_rng();
         Linear {
-            weights: Array2::from_shape_fn((output_shape, input_shape), |(_i, _j)| rng.gen_range(0., 1.)),
-            bias: Array2::from_shape_fn((output_shape, 1), |(_i, _j)| rng.gen_range(0., 1.)),
+            weights: Array2::from_shape_fn((output_shape, input_shape), |(_i, _j)| rng.gen_range(-1., 1.)),
+            bias: Array2::from_shape_fn((output_shape, 1), |(_i, _j)| rng.gen_range(-1., 1.)),
             activation_function,
         }
     }
