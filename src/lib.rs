@@ -40,7 +40,7 @@ pub fn test_xor() {
 
     println!("Beginning training a network to solve XOR problem....");
 
-    for generation in 0..10 {
+    for generation in 0..10000 {
         let mut generation_error = 0.;
 
         // Accumulate gradients for a whole generation before applying any changes to network parameters

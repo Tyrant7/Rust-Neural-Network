@@ -68,6 +68,12 @@ impl NeuralNetwork {
             let mut weight_gradient = Default::default();
             let mut bias_gradient = Default::default();
             output_gradient = layer.backward(activations, &output_gradient, &mut weight_gradient, &mut bias_gradient);
+
+            /* let weights = match layer {
+                Layer::Linear(linear) => &linear.weights
+            };
+            output_gradient = weights.t().dot(&output_gradient); */
+
             gradients.push((weight_gradient, bias_gradient));
         }
 
