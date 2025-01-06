@@ -71,19 +71,7 @@ impl NeuralNetwork {
             println!("weights shape {:?}", weight_gradient.shape());
             println!("bias shape {:?}", bias_gradient.shape());
 
-            /* let is_output_layer = layer_i == self.layers.len() - 1;
-            match is_output_layer {
-                true => {}
-                false => {
-                    let previous_layer = &self.layers[layer_i + 1];
-                    let weights = match previous_layer {
-                        Layer::Linear(linear) => &linear.weights
-                    };
-                    output_gradient = weights.t().dot(&output_gradient);
-                }
-            } */
-
-            let batch_size = 1./* inputs.nrows() as f32 */;
+            let batch_size = inputs.nrows() as f32;
             gradients.push((weight_gradient / batch_size, bias_gradient / batch_size));
         }
 
