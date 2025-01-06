@@ -70,8 +70,6 @@ pub fn test_xor() {
             let targets_array = Array2::from_shape_fn((expected.len(), 1), |(j, _k)| expected[j]);
             generation_error += (final_output - &targets_array).abs().sum();
 
-            println!("gen error: {}", generation_error);
-
             // optimizer.update(&mut network, &gradients);
 
             for (layer_i, (weights, biases)) in gradients.iter().enumerate() {

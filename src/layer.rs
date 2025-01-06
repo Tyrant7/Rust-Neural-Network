@@ -14,11 +14,11 @@ impl Layer {
     }
 
     pub fn backward(&self,    
-        activation_layers: &Array2<f32>,     
-        previous_activations: &Array2<f32>,
+        activations: &Array2<f32>,  
+        previous_transfers: &Array2<f32>,
         delta: &Array2<f32>) -> (Array2<f32>, Array2<f32>, Array2<f32>) {
         match self {
-            Layer::Linear(layer) => layer.backward(activation_layers, previous_activations, delta),
+            Layer::Linear(layer) => layer.backward(activations, previous_transfers, delta),
         }
     }
 

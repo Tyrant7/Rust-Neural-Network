@@ -33,16 +33,16 @@ impl Linear {
 
     pub fn backward(&self, 
         activations: &Array2<f32>,
-        previous_activations: &Array2<f32>,
+        previous_transfers: &Array2<f32>,
         delta: &Array2<f32>,
     ) -> (Array2<f32>, Array2<f32>, Array2<f32>) {
 
-        // Compute gradients for weights and biases, these will be passed as 'out' parameters
+        // Compute gradients for weights and biases
         
         let activated_deltas = delta * self.activation_function.derivative(activations.clone());
-        let shape = previous_activations.shape()[1] as f32;
+        let shape = previous_transfers.shape()[1] as f32;
 
-        let weight_gradient = (1. / shape) * activated_deltas.dot(&previous_activations.t());
+        let weight_gradient = (1. / shape) * activated_deltas.dot(&previous_transfers.t());
         let bias_gradient = (1. / shape) * activated_deltas.sum_axis(Axis(1)).insert_axis(Axis(1));
         /* *weight_gradient = delta.dot(&activation.t());
         *bias_gradient = delta.sum_axis(Axis(1)).insert_axis(Axis(1)); */

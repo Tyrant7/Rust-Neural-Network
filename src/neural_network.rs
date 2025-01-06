@@ -19,7 +19,7 @@ impl NeuralNetwork {
         // In this case, the last layer of activations represents the network's output
         let mut activations: Vec<Array2<f32>> = Vec::new();
         let mut transfers: Vec<Array2<f32>> = Vec::new();
-
+        
         for layer_i in 0..self.layers.len() {
 
             // Get the input to the current layer, whatever came last
@@ -53,6 +53,7 @@ impl NeuralNetwork {
 
         // TODO: loss functions
         let error = final_output - targets_array;
+        println!("Error: {}", error);
 
         // let error = -(&targets_array / final_output - (1. - targets_array.clone()) / (1. - targets_array.clone()));
 
@@ -63,19 +64,19 @@ impl NeuralNetwork {
             let layer = &self.layers[layer_i];
             // Check we underflow (to determine if we are on the input layer)
             let is_input_layer = layer_i as i32 - 1 < 0;
-            let previous_activations = match is_input_layer {
+            let previous_transfers = match is_input_layer {
                 // We are not on the input layer
-                false => &activations[layer_i - 1],
+                false => &transfers[layer_i - 1],
                 // We are on the input layer, provide the inputs
                 true => inputs,
             };
             let layer_activations = &activations[layer_i];
 
-            let (new_gradient, weight_gradient, bias_gradient) = layer.backward(layer_activations, previous_activations, &output_gradient);
+            let (new_gradient, weight_gradient, bias_gradient) = layer.backward(layer_activations, previous_transfers, &output_gradient);
             output_gradient = new_gradient;
 
-            println!("weights shape {:?}", weight_gradient.shape());
-            println!("bias shape {:?}", bias_gradient.shape());
+            /* println!("weights shape {:?}", weight_gradient.shape());
+            println!("bias shape {:?}", bias_gradient.shape()); */
 
             let batch_size = inputs.nrows() as f32;
             gradients.push((weight_gradient / batch_size, bias_gradient / batch_size));
