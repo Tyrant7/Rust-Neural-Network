@@ -61,8 +61,8 @@ pub fn test_xor() {
 
             let inputs_array = Array2::from_shape_vec((inputs.len(), 1), inputs.to_vec()).unwrap();
 
-            let activations = network.forward(&inputs_array);
-            let gradients = network.backwards(&activations, &inputs_array, Vec::from(expected));
+            let (activations, transfers) = network.forward(&inputs_array);
+            let gradients = network.backwards(&activations, &transfers, &inputs_array, Vec::from(expected));
 
             // Calculate mean absolute error for analysis
             let final_output = activations.last().unwrap();
@@ -106,7 +106,7 @@ pub fn sample() {
     println!("inputs:");
     println!("{:?}", inputs);
 
-    let activations = network.forward(&inputs);
+    let (activations, transfers) = network.forward(&inputs);
 
     println!("\nActivations:");
     println!("{:?}", activations);
@@ -118,7 +118,7 @@ pub fn sample() {
 
     println!("\nBeginning backward pass...");
 
-    let gradients = network.backwards(&activations, &inputs, vec![target]);
+    let gradients = network.backwards(&activations, &transfers, &inputs, vec![target]);
 
     println!("Gradients:");
     println!("{:#?}", gradients);
