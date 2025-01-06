@@ -1,6 +1,6 @@
 use ndarray::Array2;
 
-use crate::layer::Layer;
+use crate::layer::{self, Layer};
 
 pub struct NeuralNetwork {
     pub layers: Vec<Layer>,
@@ -27,11 +27,12 @@ impl NeuralNetwork {
                 true => inputs,
                 false => &activations[layer_i - 1]
             };
+            let layer = &self.layers[layer_i];
 
             // Forward through the current layer
-            let transfer = self.layers[layer_i].forward(previous_activations); // but without activation
-            transfers.push(transfer);
-            let layer_activations = self.layers[layer_i].forward(previous_activations);
+            let transfer_layer = layer.forward(previous_activations); // but without activation
+            transfers.push(transfer_layer.clone());
+            let layer_activations = layer.activate(transfer_layer);
 
             // Push to the stack for next layer
             activations.push(layer_activations);

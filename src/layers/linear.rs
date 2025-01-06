@@ -28,7 +28,11 @@ impl Linear {
     }
 
     pub fn forward(&self, input: &Array2<f32>) -> Array2<f32> {
-        self.activation_function.plain(self.weights.dot(input) + &self.bias)
+        self.weights.dot(input) + &self.bias
+    }
+
+    pub fn activate(&self, transfers: Array2<f32>) -> Array2<f32> {
+        self.activation_function.plain(transfers)
     }
 
     pub fn backward(&self, 

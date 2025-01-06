@@ -13,6 +13,12 @@ impl Layer {
         }
     }
 
+    pub fn activate(&self, transfers: Array2<f32>) -> Array2<f32> {
+        match self {
+            Layer::Linear(layer) => layer.activate(transfers),
+        }
+    }
+
     pub fn backward(&self,    
         activations: &Array2<f32>,  
         previous_transfers: &Array2<f32>,
