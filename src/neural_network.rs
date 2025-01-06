@@ -63,10 +63,10 @@ impl NeuralNetwork {
             };
 
             println!("output grad shape {:?}", output_gradient.shape());
-            
-            let (_, weight_gradient, bias_gradient) = layer.backward(activations, &output_gradient);
 
-            let is_output_layer = layer_i == self.layers.len() - 1;
+            let (new_gradient, weight_gradient, bias_gradient) = layer.backward(activations, &output_gradient);
+            output_gradient = new_gradient;
+            /* let is_output_layer = layer_i == self.layers.len() - 1;
             match is_output_layer {
                 true => {}
                 false => {
@@ -76,7 +76,7 @@ impl NeuralNetwork {
                     };
                     output_gradient = weights.t().dot(&output_gradient);
                 }
-            }
+            } */
 
             gradients.push((weight_gradient, bias_gradient));
         }
