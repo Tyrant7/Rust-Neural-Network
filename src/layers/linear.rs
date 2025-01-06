@@ -36,10 +36,9 @@ impl Linear {
         delta: &Array2<f32>,
     ) -> (Array2<f32>, Array2<f32>, Array2<f32>) {
 
-        // Compute gradients for weights and biases, these will be passed as 'out' parameters
-        
         let activated_deltas = self.activation_function.derivative(delta.clone());
-
+        
+        // Compute gradients for weights and biases
         let weight_gradient = activated_deltas.dot(&activations.t());
         let bias_gradient = activated_deltas.sum_axis(Axis(1)).insert_axis(Axis(1));
         /* *weight_gradient = delta.dot(&activation.t());

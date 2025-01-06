@@ -47,6 +47,7 @@ impl NeuralNetwork {
 
         // TODO: loss functions
         let error = final_output - targets_array;
+        // let error = -(&targets_array / final_output - (1. - targets_array.clone()) / (1. - targets_array.clone()));
 
         // Propagate backwards over all layers, skipping the input layer
         let mut output_gradient = error;
@@ -64,6 +65,9 @@ impl NeuralNetwork {
 
             let (new_gradient, weight_gradient, bias_gradient) = layer.backward(activations, &output_gradient);
             output_gradient = new_gradient;
+
+            println!("propagated gradient: {:#?}", &output_gradient);
+
             /* let is_output_layer = layer_i == self.layers.len() - 1;
             match is_output_layer {
                 true => {}
@@ -76,7 +80,8 @@ impl NeuralNetwork {
                 }
             } */
 
-            gradients.push((weight_gradient, bias_gradient));
+            let batch_size = inputs.nrows() as f32;
+            gradients.push((weight_gradient / batch_size, bias_gradient / batch_size));
         }
 
         // Reverse gradients so they match layer order (input -> output)
