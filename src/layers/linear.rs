@@ -38,13 +38,15 @@ impl Linear {
 
         // Compute gradients for weights and biases, these will be passed as 'out' parameters
         
-        let weight_gradient = delta.dot(&activations.t());
-        let bias_gradient = delta.sum_axis(Axis(1)).insert_axis(Axis(1));
+        let activated_deltas = self.activation_function.derivative(delta.clone());
+
+        let weight_gradient = activated_deltas.dot(&activations.t());
+        let bias_gradient = activated_deltas.sum_axis(Axis(1)).insert_axis(Axis(1));
         /* *weight_gradient = delta.dot(&activation.t());
         *bias_gradient = delta.sum_axis(Axis(1)).insert_axis(Axis(1)); */
-
+        
         // Compute the input gradient to propagate backward
-        (self.weights.t().dot(delta), weight_gradient, bias_gradient)
+        (self.weights.t().dot(&activated_deltas), weight_gradient, bias_gradient)
     }
 
     pub fn get_params(&self) -> (&Array2<f32>, &Array2<f32>) {

@@ -27,7 +27,7 @@ pub fn test_xor() {
         NeuralNetwork::new(vec![Layer::linear(2, 2, ReLU),  Layer::linear(2, 1, ReLU)]);
 
     let mut optimizer = SGD {
-        learning_rate: 0.001,
+        learning_rate: 0.0025,
     };
 
     // All inputs of XOR matched to their respective outputs
@@ -49,7 +49,6 @@ pub fn test_xor() {
         for layer in network.layers.iter() {
             match layer {
                 Layer::Linear(linear) => {
-
                     gen_grads.push((
                         Array2::from_elem(linear.weights.raw_dim(), 0.),
                         Array2::from_elem(linear.bias.raw_dim(), 0.),
@@ -72,6 +71,8 @@ pub fn test_xor() {
             generation_error += (final_output - &targets_array).abs().sum();
 
             println!("gen error: {}", generation_error);
+
+            // optimizer.update(&mut network, &gradients);
 
             for (layer_i, (weights, biases)) in gradients.iter().enumerate() {
 

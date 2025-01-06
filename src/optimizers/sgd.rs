@@ -9,6 +9,10 @@ pub struct SGD {
 impl Optimizer for SGD {
     fn update(&mut self, network: &mut NeuralNetwork, gradients: &[(Array2<f32>, Array2<f32>)]) {
         for (layer, layer_gradients) in network.layers.iter_mut().zip(gradients) {
+
+            // println!("layer: {:#?}", layer.get_params_mut());
+            // println!("grads: {:#?}", layer_gradients);
+
             let layer_params = layer.get_params_mut();
             for (weight, delta) in layer_params.0.iter_mut().zip(&layer_gradients.0) {
                 *weight -= delta * self.learning_rate;
