@@ -41,7 +41,7 @@ impl NeuralNetwork {
         (activations, transfers)
     }
 
-    pub fn backwards(&mut self, activations: &[Array2<f32>], transfers: &[Array2<f32>], inputs: &Array2<f32>, targets: Vec<f32>) -> Vec<(Array2<f32>, Array2<f32>)> {
+    pub fn backwards(&mut self, activations: &[Array2<f32>], transfers: &[Array2<f32>], inputs_count: f32, targets: Vec<f32>) -> Vec<(Array2<f32>, Array2<f32>)> {
         
         // Define our gradients for each layer, this is what we'll be returning
         let mut gradients = Vec::new();
@@ -64,13 +64,8 @@ impl NeuralNetwork {
         for layer_i in (0..self.layers.len()).rev() {
             let layer = &self.layers[layer_i];
             // Check we underflow (to determine if we are on the input layer)
-            let is_input_layer = layer_i as i32 - 1 < 0;
-            let previous_transfers = match is_input_layer {
-                // We are not on the input layer
-                false => &transfers[layer_i - 1],
-                // We are on the input layer, provide the inputs
-                true => inputs,
-            };
+            
+            let previous_transfers = &transfers[layer_i];
             let layer_activations = &activations[layer_i];
 
             let (new_gradient, weight_gradient, bias_gradient) = layer.backward(layer_activations, previous_transfers, &output_gradient);
@@ -79,8 +74,7 @@ impl NeuralNetwork {
             /* println!("weights shape {:?}", weight_gradient.shape());
             println!("bias shape {:?}", bias_gradient.shape()); */
 
-            let batch_size = inputs.nrows() as f32;
-            gradients.push((weight_gradient / batch_size, bias_gradient / batch_size));
+            gradients.push((weight_gradient / inputs_count, bias_gradient / inputs_count));
         }
 
         // Reverse gradients so they match layer order (input -> output)
