@@ -54,7 +54,8 @@ impl NeuralNetwork {
         for layer_i in (0..self.layers.len()).rev() {
             let layer = &self.layers[layer_i];
             // Check we underflow (to determine if we are on the input layer)
-            let activations = match (layer_i as i32 - 1) <= 0 {
+            let is_input_layer = layer_i as i32 - 1 <= 0;
+            let activations = match is_input_layer {
                 // We are not on the input layer
                 false => &activation_layers[layer_i - 1],
                 // We are on the input layer, provide the inputs
@@ -62,17 +63,20 @@ impl NeuralNetwork {
             };
 
             println!("output grad shape {:?}", output_gradient.shape());
+            
+            let (_, weight_gradient, bias_gradient) = layer.backward(activations, &output_gradient);
 
-            // While 'out' parameters are ugly here, they should have a fair performance gain
-            // TODO: Test if that is entirely true
-            let mut weight_gradient = Default::default();
-            let mut bias_gradient = Default::default();
-            output_gradient = layer.backward(activations, &output_gradient, &mut weight_gradient, &mut bias_gradient);
-
-            /* let weights = match layer {
-                Layer::Linear(linear) => &linear.weights
-            };
-            output_gradient = weights.t().dot(&output_gradient); */
+            let is_output_layer = layer_i == self.layers.len() - 1;
+            match is_output_layer {
+                true => {}
+                false => {
+                    let previous_layer = &self.layers[layer_i + 1];
+                    let weights = match previous_layer {
+                        Layer::Linear(linear) => &linear.weights
+                    };
+                    output_gradient = weights.t().dot(&output_gradient);
+                }
+            }
 
             gradients.push((weight_gradient, bias_gradient));
         }

@@ -15,11 +15,9 @@ impl Layer {
 
     pub fn backward(&self,    
         activation_layers: &Array2<f32>,     
-        delta: &Array2<f32>,
-        weight_gradient: &mut Array2<f32>, 
-        bias_gradient: &mut Array2<f32>) -> Array2<f32> {
+        delta: &Array2<f32>) -> (Array2<f32>, Array2<f32>, Array2<f32>) {
         match self {
-            Layer::Linear(layer) => layer.backward(activation_layers, delta, weight_gradient, bias_gradient),
+            Layer::Linear(layer) => layer.backward(activation_layers, delta),
         }
     }
 
