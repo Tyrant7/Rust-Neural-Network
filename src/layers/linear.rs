@@ -4,9 +4,9 @@ use rand::Rng;
 use crate::{activation_functions::ActivationFunction, layer::Layer};
 
 pub struct Linear {
-    weights: Array2<f32>,
-    bias: Array2<f32>,
-    activation_function: ActivationFunction,
+    pub weights: Array2<f32>,
+    pub bias: Array2<f32>,
+    pub activation_function: ActivationFunction,
 }
 
 impl Linear {
@@ -32,20 +32,21 @@ impl Linear {
     }
 
     pub fn backward(&self, 
-        activation: &Array2<f32>, 
-        output_gradient: &Array2<f32>, 
+        activations: &Array2<f32>,
+        delta: &Array2<f32>,
         weight_gradient: &mut Array2<f32>, 
         bias_gradient: &mut Array2<f32>
     ) -> Array2<f32> {
-        // Compute the derivative of the activation function then combine with the output gradient to get the delta
-        let delta = output_gradient * self.activation_function.derivative(activation);
 
         // Compute gradients for weights and biases, these will be passed as 'out' parameters
-        *weight_gradient = delta.dot(&activation.t());
+        
+        *weight_gradient = delta.dot(&activations.t());
         *bias_gradient = delta.sum_axis(Axis(1)).insert_axis(Axis(1));
+        /* *weight_gradient = delta.dot(&activation.t());
+        *bias_gradient = delta.sum_axis(Axis(1)).insert_axis(Axis(1)); */
 
         // Compute the input gradient to propagate backward
-        self.weights.t().dot(&delta)
+        self.weights.t().dot(delta)
     }
 
     pub fn get_params(&self) -> (&Array2<f32>, &Array2<f32>) {

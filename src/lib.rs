@@ -5,8 +5,8 @@ pub mod optimizer;
 
 use layer::Layer;
 
-pub mod layers;
 pub mod activation_functions;
+pub mod layers;
 
 use activation_functions::ActivationFunction::{ReLU, Sigmoid};
 
@@ -23,19 +23,19 @@ pub fn main() {
 }
 
 pub fn test_xor() {
-    let mut network = NeuralNetwork::new(vec![
-        Layer::linear(2, 2, ReLU),
-        Layer::linear(2, 1, ReLU),
-    ]);
+    let mut network =
+        NeuralNetwork::new(vec![Layer::linear(2, 2, ReLU),  Layer::linear(2, 1, ReLU)]);
 
-    let mut optimizer = SGD { learning_rate: 0.01 };
+    let mut optimizer = SGD {
+        learning_rate: 0.01,
+    };
 
     // All inputs of XOR matched to their respective outputs
     let train_data = [
-        ([0., 0.], [0.]), 
+        ([0., 0.], [0.]),
         ([0., 1.], [1.]),
         ([1., 0.], [1.]),
-        ([1., 1.], [0.])
+        ([1., 1.], [0.]),
     ];
 
     println!("Beginning training a network to solve XOR problem....");
@@ -45,24 +45,42 @@ pub fn test_xor() {
 
         // Accumulate gradients for a whole generation before applying any changes to network parameters
         let mut gen_grads: Vec<(Array2<f32>, Array2<f32>)> = vec![];
-        
+
+        for layer in network.layers.iter() {
+            match layer {
+                Layer::Linear(linear) => {
+                    println!("forward weights shape {:?}", linear.weights.shape());
+
+                    gen_grads.push((
+                        Array2::from_elem(linear.weights.raw_dim(), 0.),
+                        Array2::from_elem(linear.bias.raw_dim(), 0.),
+                    ))
+                }
+            }
+        }
+
         for (inputs, expected) in train_data.iter() {
-            let activations = network.forward(Vec::from(inputs));
-            let gradients = network.backwards(&activations, Vec::from(expected));
+
+            let inputs_array = Array2::from_shape_vec((inputs.len(), 1), inputs.to_vec()).unwrap();
+
+            let activations = network.forward(&inputs_array);
+            let gradients = network.backwards(&activations, &inputs_array, Vec::from(expected));
 
             // Calculate mean absolute error for analysis
             let final_output = activations.last().unwrap();
+            println!("output {} target {}", final_output.first().unwrap(), expected[0]);
             let targets_array = Array2::from_shape_fn((expected.len(), 1), |(j, _k)| expected[j]);
             generation_error += (final_output - targets_array).abs().sum();
+            println!("error {generation_error}");
 
             for (layer_i, (weights, biases)) in gradients.iter().enumerate() {
-                let accumulate= gen_grads.get_mut(layer_i).unwrap_or((
-                    Array2::from_elem(weights.shape(), 0), 
-                    Array2::from_elem(biases.shape(), 0)
-                ));
 
-                accumulate.0 += weights;
-                accumulate.1 += biases;
+                let layer_batch_grads = &mut gen_grads[layer_i];
+
+                println!("shape grad weights {:?}", weights.shape());
+
+                layer_batch_grads.0 += weights;
+                layer_batch_grads.1 += biases;
             }
         }
 
@@ -81,18 +99,19 @@ pub fn sample() {
         Layer::linear(2, 1, ReLU),
     ]);
 
-    let inputs: Vec<f32> = vec![0., 0., 0., 0.];
+    let inputs_vec: Vec<f32> = vec![0., 0., 0., 0.];
+    let inputs = Array2::from_shape_vec((4, 1), inputs_vec).unwrap();
     let target: f32 = 1.;
 
     println!("\nData initialized:");
     println!("inputs:");
     println!("{:?}", inputs);
 
-    let activations = network.forward(inputs);
+    let activations = network.forward(&inputs);
 
     println!("\nActivations:");
     println!("{:?}", activations);
-    
+
     println!("output:");
     println!("{:?}", activations.last().unwrap());
     println!("target:");
@@ -100,13 +119,15 @@ pub fn sample() {
 
     println!("\nBeginning backward pass...");
 
-    let gradients = network.backwards(&activations, vec![target]);
+    let gradients = network.backwards(&activations, &inputs, vec![target]);
 
     println!("Gradients:");
     println!("{:#?}", gradients);
 
     println!("Optimizing gradients...");
-    let mut optimizer = SGD { learning_rate: 0.001 };
+    let mut optimizer = SGD {
+        learning_rate: 0.001,
+    };
     optimizer.update(&mut network, &gradients);
 
     println!("\nAnalysis complete!");
