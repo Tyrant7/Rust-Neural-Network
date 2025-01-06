@@ -47,6 +47,7 @@ impl NeuralNetwork {
 
         // TODO: loss functions
         let error = final_output - targets_array;
+
         // let error = -(&targets_array / final_output - (1. - targets_array.clone()) / (1. - targets_array.clone()));
 
         // Propagate backwards over all layers, skipping the input layer
@@ -55,18 +56,20 @@ impl NeuralNetwork {
         for layer_i in (0..self.layers.len()).rev() {
             let layer = &self.layers[layer_i];
             // Check we underflow (to determine if we are on the input layer)
-            let is_input_layer = layer_i as i32 - 1 <= 0;
-            let activations = match is_input_layer {
+            let is_input_layer = layer_i as i32 - 1 < 0;
+            let previous_activations = match is_input_layer {
                 // We are not on the input layer
                 false => &activation_layers[layer_i - 1],
                 // We are on the input layer, provide the inputs
                 true => inputs,
             };
+            let activations = &activation_layers[layer_i];
 
-            let (new_gradient, weight_gradient, bias_gradient) = layer.backward(activations, &output_gradient);
+            let (new_gradient, weight_gradient, bias_gradient) = layer.backward(activations, previous_activations, &output_gradient);
             output_gradient = new_gradient;
 
-            println!("propagated gradient: {:#?}", &output_gradient);
+            println!("weights shape {:?}", weight_gradient.shape());
+            println!("bias shape {:?}", bias_gradient.shape());
 
             /* let is_output_layer = layer_i == self.layers.len() - 1;
             match is_output_layer {
@@ -80,7 +83,7 @@ impl NeuralNetwork {
                 }
             } */
 
-            let batch_size = inputs.nrows() as f32;
+            let batch_size = 1./* inputs.nrows() as f32 */;
             gradients.push((weight_gradient / batch_size, bias_gradient / batch_size));
         }
 
