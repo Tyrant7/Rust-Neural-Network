@@ -40,7 +40,7 @@ impl Linear {
         previous_transfers: &Array2<f32>,
         delta: &Array2<f32>,
     ) -> (Array2<f32>, Array2<f32>, Array2<f32>) {
-
+        
         // Compute gradients for weights and biases
         
         let activated_deltas = delta * self.activation_function.derivative(activations.clone());

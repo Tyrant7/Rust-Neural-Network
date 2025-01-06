@@ -23,14 +23,14 @@ impl NeuralNetwork {
         for layer_i in 0..self.layers.len() {
 
             // Get the input to the current layer, whatever came last
-            let previous_activations: &Array2<f32> = match (layer_i as i32 - 1) < 0 {
+            let previous_layer: &Array2<f32> = match (layer_i as i32 - 1) < 0 {
                 true => inputs,
                 false => &activations[layer_i - 1]
             };
             let layer = &self.layers[layer_i];
 
             // Forward through the current layer
-            let transfer_layer = layer.forward(previous_activations); // but without activation
+            let transfer_layer = layer.forward(previous_layer); // but without activation
             transfers.push(transfer_layer.clone());
             let layer_activations = layer.activate(transfer_layer);
 
@@ -58,21 +58,23 @@ impl NeuralNetwork {
 
         // let error = -(&targets_array / final_output - (1. - targets_array.clone()) / (1. - targets_array.clone()));
 
-        // Propagate backwards over all layers, skipping the input layer
         let mut output_gradient = error;
+
+        // Propagate backwards over all layers
 
         for layer_i in (0..self.layers.len()).rev() {
             let layer = &self.layers[layer_i];
-            // Check we underflow (to determine if we are on the input layer)
-            
+            // Check we underflow (to determine if we are on the input layer)            
+
             let previous_transfers = &transfers[layer_i];
             let layer_activations = &activations[layer_i];
+            println!("layer activation shape {:?}", layer_activations.shape());
 
             let (new_gradient, weight_gradient, bias_gradient) = layer.backward(layer_activations, previous_transfers, &output_gradient);
             output_gradient = new_gradient;
 
-            /* println!("weights shape {:?}", weight_gradient.shape());
-            println!("bias shape {:?}", bias_gradient.shape()); */
+            println!("weights shape {:?}", weight_gradient.shape());
+            println!("bias shape {:?}", bias_gradient.shape());
 
             gradients.push((weight_gradient / inputs_count, bias_gradient / inputs_count));
         }
