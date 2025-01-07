@@ -47,16 +47,13 @@ impl Linear {
         let shape = previous_transfers.nrows() as f32;
 
         let weight_gradient = activated_deltas.dot(&previous_transfers.t()) / shape;
-        let bias_gradient = activated_deltas.sum_axis(Axis(1)).insert_axis(Axis(1)) / shape;
+        let bias_gradient = activated_deltas.sum_axis(Axis(0)).insert_axis(Axis(0)) / shape;
         /* *weight_gradient = delta.dot(&activation.t());
         *bias_gradient = delta.sum_axis(Axis(1)).insert_axis(Axis(1)); */
-        
-        println!("next {:#?}", self.weights.t().dot(&activated_deltas));
-        println!("weig {:#?}", weight_gradient);
-        println!("bias {:#?}", bias_gradient);
 
         // Compute the input gradient to propagate backward
-        (self.weights.t().dot(&activated_deltas), weight_gradient, bias_gradient)
+        let next_input = self.weights.t().dot(&activated_deltas);
+        (next_input, weight_gradient, bias_gradient)
     }
 
     pub fn get_params(&self) -> (&Array2<f32>, &Array2<f32>) {

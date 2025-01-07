@@ -1,4 +1,4 @@
-use ndarray::Array2;
+use ndarray::{Array, Array2};
 
 use crate::layer::Layer;
 
@@ -29,10 +29,15 @@ impl NeuralNetwork {
             };
             let layer = &self.layers[layer_i];
 
-            // Forward through the current layer
-            let transfer_layer = layer.forward(previous_layer); // but without activation
+            // Forward through the current layer, but without activation
+            let transfer_layer = layer.forward(previous_layer);
             transfers.push(transfer_layer.clone());
             let layer_activations = layer.activate(transfer_layer);
+
+            println!("Forward");
+            println!("layer    {:?}", layer.get_params().0.shape());
+            println!("previous {:?}", previous_layer.shape());
+            println!("next     {:?}", layer_activations.shape());
 
             // Push to the stack for next layer
             activations.push(layer_activations);
@@ -56,8 +61,6 @@ impl NeuralNetwork {
         let error = final_output - targets_array;
         println!("Error: {}", error);
 
-        // let error = -(&targets_array / final_output - (1. - targets_array.clone()) / (1. - targets_array.clone()));
-
         let mut output_gradient = error;
 
         // Propagate backwards over all layers
@@ -71,6 +74,11 @@ impl NeuralNetwork {
 
             let (new_gradient, weight_gradient, bias_gradient) = layer.backward(layer_activations, previous_transfers, &output_gradient);
             output_gradient = new_gradient;
+
+            println!("Backward");
+            println!("previous {:?}", previous_transfers.shape());
+            println!("layer    {:?}", layer.get_params().0.shape());
+            println!("next     {:?}", output_gradient.shape());
 
             gradients.push((weight_gradient / inputs_count, bias_gradient / inputs_count));
         }

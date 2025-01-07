@@ -28,6 +28,12 @@ impl Layer {
         }
     }
 
+    pub fn get_params(&self) -> (&Array2<f32>, &Array2<f32>) {
+        match self {
+            Layer::Linear(layer) => layer.get_params(),
+        }
+    }
+
     pub fn get_params_mut(&mut self) -> (&mut Array2<f32>, &mut Array2<f32>) {
         match self {
             Layer::Linear(layer) => layer.get_params_mut(),
