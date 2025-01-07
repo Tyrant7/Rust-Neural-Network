@@ -40,7 +40,7 @@ impl Linear {
         previous_transfers: &Array2<f32>,
         delta: &Array2<f32>,
     ) -> (Array2<f32>, Array2<f32>, Array2<f32>) {
-        
+
         // Compute gradients for weights and biases
         
         let activated_deltas = delta * self.activation_function.derivative(activations.clone());
@@ -50,6 +50,8 @@ impl Linear {
         let bias_gradient = activated_deltas.sum_axis(Axis(0)).insert_axis(Axis(0)) / shape;
         /* *weight_gradient = delta.dot(&activation.t());
         *bias_gradient = delta.sum_axis(Axis(1)).insert_axis(Axis(1)); */
+
+        println!("weight gradient {}", weight_gradient);
 
         // Compute the input gradient to propagate backward
         let next_input = self.weights.t().dot(&activated_deltas);
