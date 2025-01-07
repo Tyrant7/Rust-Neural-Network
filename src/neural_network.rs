@@ -1,6 +1,6 @@
 use ndarray::Array2;
 
-use crate::layer::{self, Layer};
+use crate::layer::Layer;
 
 pub struct NeuralNetwork {
     pub layers: Vec<Layer>,
@@ -68,13 +68,9 @@ impl NeuralNetwork {
 
             let previous_transfers = &transfers[layer_i];
             let layer_activations = &activations[layer_i];
-            println!("layer activation shape {:?}", layer_activations.shape());
 
             let (new_gradient, weight_gradient, bias_gradient) = layer.backward(layer_activations, previous_transfers, &output_gradient);
             output_gradient = new_gradient;
-
-            println!("weights shape {:?}", weight_gradient.shape());
-            println!("bias shape {:?}", bias_gradient.shape());
 
             gradients.push((weight_gradient / inputs_count, bias_gradient / inputs_count));
         }

@@ -27,7 +27,7 @@ pub fn test_xor() {
         NeuralNetwork::new(vec![Layer::linear(2, 2, ReLU),  Layer::linear(2, 1, ReLU)]);
 
     let mut optimizer = SGD {
-        learning_rate: 0.0025,
+        learning_rate: 0.01,
     };
 
     // All inputs of XOR matched to their respective outputs

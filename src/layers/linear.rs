@@ -44,13 +44,17 @@ impl Linear {
         // Compute gradients for weights and biases
         
         let activated_deltas = delta * self.activation_function.derivative(activations.clone());
-        let shape = previous_transfers.shape()[1] as f32;
+        let shape = previous_transfers.nrows() as f32;
 
-        let weight_gradient = (1. / shape) * activated_deltas.dot(&previous_transfers.t());
-        let bias_gradient = (1. / shape) * activated_deltas.sum_axis(Axis(1)).insert_axis(Axis(1));
+        let weight_gradient = activated_deltas.dot(&previous_transfers.t()) / shape;
+        let bias_gradient = activated_deltas.sum_axis(Axis(1)).insert_axis(Axis(1)) / shape;
         /* *weight_gradient = delta.dot(&activation.t());
         *bias_gradient = delta.sum_axis(Axis(1)).insert_axis(Axis(1)); */
         
+        println!("next {:#?}", self.weights.t().dot(&activated_deltas));
+        println!("weig {:#?}", weight_gradient);
+        println!("bias {:#?}", bias_gradient);
+
         // Compute the input gradient to propagate backward
         (self.weights.t().dot(&activated_deltas), weight_gradient, bias_gradient)
     }
