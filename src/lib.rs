@@ -39,7 +39,7 @@ pub fn test_xor() {
     ];
 
     println!("Beginning training a network to solve XOR problem....");
-    
+
     for generation in 0..1000 {
         let mut generation_error = 0.;
 

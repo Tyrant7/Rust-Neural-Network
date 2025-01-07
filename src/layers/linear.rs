@@ -31,22 +31,22 @@ impl Linear {
         self.weights.dot(input) + &self.bias
     }
 
-    pub fn activate(&self, transfers: Array2<f32>) -> Array2<f32> {
-        self.activation_function.plain(transfers)
+    pub fn activate(&self, activations: Array2<f32>) -> Array2<f32> {
+        self.activation_function.plain(activations)
     }
 
     pub fn backward(&self, 
+        transfers: &Array2<f32>,
         activations: &Array2<f32>,
-        previous_transfers: &Array2<f32>,
         delta: &Array2<f32>,
     ) -> (Array2<f32>, Array2<f32>, Array2<f32>) {
 
         // Compute gradients for weights and biases
         
-        let activated_deltas = delta * self.activation_function.derivative(activations.clone());
-        let shape = previous_transfers.nrows() as f32;
+        let activated_deltas = delta * self.activation_function.derivative(transfers.clone());
+        let shape = activations.nrows() as f32;
 
-        let weight_gradient = activated_deltas.dot(&previous_transfers.t()) / shape;
+        let weight_gradient = activated_deltas.dot(&activations.t()) / shape;
         let bias_gradient = activated_deltas.sum_axis(Axis(0)).insert_axis(Axis(0)) / shape;
         /* *weight_gradient = delta.dot(&activation.t());
         *bias_gradient = delta.sum_axis(Axis(1)).insert_axis(Axis(1)); */

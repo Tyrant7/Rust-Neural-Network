@@ -69,20 +69,19 @@ impl NeuralNetwork {
             let layer = &self.layers[layer_i];
             // Check we underflow (to determine if we are on the input layer)            
 
-            let previous_transfers = &transfers[layer_i];
-            let layer_activations = &transfers[layer_i];
+            let transfer_layer = &transfers[layer_i];
 
             let is_input_layer = layer_i == 0;
-            let acts = match is_input_layer {
+            let activation_layer = match is_input_layer {
                 true => inputs,
                 false => &activations[layer_i - 1]
             };
 
-            let (new_gradient, weight_gradient, bias_gradient) = layer.backward(previous_transfers, acts, &output_gradient);
+            let (new_gradient, weight_gradient, bias_gradient) = layer.backward(transfer_layer, activation_layer, &output_gradient);
             output_gradient = new_gradient;
 
             /* println!("Backward");
-            println!("previous {:?}", previous_transfers.shape());
+            println!("previous {:?}", transfer_layer.shape());
             println!("layer    {:?}", layer.get_params().0.shape());
             println!("next     {:?}", output_gradient.shape()); */
 
