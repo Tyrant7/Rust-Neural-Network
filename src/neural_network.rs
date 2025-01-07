@@ -70,7 +70,7 @@ impl NeuralNetwork {
             // Check we underflow (to determine if we are on the input layer)            
 
             let previous_transfers = &transfers[layer_i];
-            let layer_activations = &activations[layer_i];
+            let layer_activations = &transfers[layer_i];
 
             let (new_gradient, weight_gradient, bias_gradient) = layer.backward(layer_activations, previous_transfers, &output_gradient);
             output_gradient = new_gradient;
