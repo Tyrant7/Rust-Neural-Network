@@ -2,6 +2,7 @@ use ndarray::Array2;
 
 use crate::layers::linear::Linear;
 
+#[derive(Debug)]
 pub enum Layer {
     Linear(Linear),
 }
@@ -20,11 +21,11 @@ impl Layer {
     }
 
     pub fn backward(&self,    
-        transfers: &Array2<f32>,  
-        activations: &Array2<f32>,
-        delta: &Array2<f32>) -> (Array2<f32>, Array2<f32>, Array2<f32>) {
+        activations: &Array2<f32>,  
+        prev_activations: &Array2<f32>,
+        error: &Array2<f32>) -> (Array2<f32>, Array2<f32>, Array2<f32>) {
         match self {
-            Layer::Linear(layer) => layer.backward(transfers, activations, delta),
+            Layer::Linear(layer) => layer.backward(activations, prev_activations, error),
         }
     }
 

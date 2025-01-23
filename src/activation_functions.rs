@@ -1,5 +1,6 @@
 use ndarray::Array2;
 
+#[derive(Debug)]
 pub enum ActivationFunction {
     None,
     ReLU,
@@ -24,7 +25,7 @@ impl ActivationFunction {
         match self {
             ActivationFunction::None => input,
             ActivationFunction::ReLU => input.mapv(|x| if x > 0. { 1. } else { 0. }),
-            ActivationFunction::Sigmoid => input.mapv(|x| sigmoid_internal(x) * (1. - sigmoid_internal(x))),
+            ActivationFunction::Sigmoid => input.mapv(|x| x * (1. - x)/* sigmoid_internal(x) * (1. - sigmoid_internal(x)) */),
             ActivationFunction::LeakyReLU => input.mapv(|x| match x < 0. {
                 true => 0.01,
                 false => 1.

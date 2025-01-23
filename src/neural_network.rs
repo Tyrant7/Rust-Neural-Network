@@ -39,32 +39,31 @@ impl NeuralNetwork {
             transfers.push(transfer_layer.clone());
             let layer_activations = layer.activate(transfer_layer);
 
-            println!("Forward");
-            println!("layer shape    {:?}", layer.get_params().0.shape());
-            println!("previous shape {:?}", previous_layer.shape());
-            println!("act shape     {:?}", layer_activations.shape());
-
             // Push to the stack for next layer
             activations.push(layer_activations);
+        }
+
+        println!("{}", "Forward activations".bright_purple());
+        for layer_i in 0..self.layers.len() {
+            println!("{} {} {}", "Layer".bright_purple(), layer_i, activations[layer_i]);
         }
 
         (activations, transfers)
     }
 
-    pub fn backwards(&mut self, activations: &[Array2<f32>], transfers: &[Array2<f32>], inputs: &Array2<f32>, targets: Vec<f32>) -> Vec<(Array2<f32>, Array2<f32>)> {
+    pub fn backwards(&mut self, activations: &[Array2<f32>], transfers: &[Array2<f32>], inputs: &Array2<f32>, targets: &Array2<f32>) -> (Vec<Array2<f32>>, Vec<Array2<f32>>) {
         
         // Define our gradients for each layer, this is what we'll be returning
-        let mut gradients = Vec::new();
+        let mut weight_gradients = Vec::new();
+        let mut bias_gradients = Vec::new();
 
         // Calculate the error at the output layer
-        let final_output = activations.last().unwrap();
-
-        // Construct our targets array, assume shape matches network output shape
-        let targets_array = Array2::from_shape_vec((targets.len(), 1), targets).unwrap();
+        let final_outputs = activations.last().unwrap();
 
         // TODO: loss functions
-        let error = final_output - targets_array;
-        println!("Error: {}", error.first().unwrap());
+        let error = targets - final_outputs;
+
+        println!("{}: {}", "Errors".red(), error);
 
         let mut output_gradient = error;
 
@@ -74,15 +73,15 @@ impl NeuralNetwork {
             let layer = &self.layers[layer_i];
             // Check we underflow (to determine if we are on the input layer)            
             
-            let transfer_layer = &transfers[layer_i];
+            let activation_layer = &transfers[layer_i];
 
             let is_input_layer = layer_i == 0;
-            let activation_layer = match is_input_layer {
+            let prev_activation_layer = match is_input_layer {
                 true => inputs,
                 false => &activations[layer_i - 1]
             };
 
-            let (new_gradient, weight_gradient, bias_gradient) = layer.backward(transfer_layer, activation_layer, &output_gradient);
+            let (new_gradient, weight_gradient, bias_gradient) = layer.backward(activation_layer, prev_activation_layer, &output_gradient);
             output_gradient = new_gradient;
 
             /* println!("Backward");
@@ -90,12 +89,19 @@ impl NeuralNetwork {
             println!("layer    {:?}", layer.get_params().0.shape());
             println!("next     {:?}", output_gradient.shape()); */
 
-            let batch_size = inputs.nrows() as f32;
-            gradients.push((weight_gradient / batch_size, bias_gradient / batch_size));
+            let batch_size = 1.; // inputs.nrows() as f32;
+
+            weight_gradients.push(weight_gradient / batch_size);
+            bias_gradients.push(bias_gradient / batch_size);
         }
 
         // Reverse gradients so they match layer order (input -> output)
-        gradients.reverse();
-        gradients
+        weight_gradients.reverse();
+        bias_gradients.reverse();
+
+        println!("{}: {:?}", "Weight gradients".bright_red(), weight_gradients);
+        println!("{}: {:?}", "Bias gradients".bright_red(), bias_gradients);
+
+        (weight_gradients, bias_gradients)
     }
 }
