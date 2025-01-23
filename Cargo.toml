@@ -12,6 +12,7 @@ edition = "2021"
 rand = "0.7.3"
 float-ord = "0.3.2"
 ndarray = { version = "0.16.1", features = ["serde"] }
+colored = "3.0.0"
 
 [features]
 debug_network = []

@@ -8,17 +8,17 @@ pub struct SGD {
 
 impl Optimizer for SGD {
     fn update(&mut self, network: &mut NeuralNetwork, gradients: &[(Array2<f32>, Array2<f32>)]) {
-        for (layer, layer_gradients) in network.layers.iter_mut().zip(gradients) {
+        for (layer, (weight_grads, bias_grads)) in network.layers.iter_mut().zip(gradients) {
 
-            // println!("layer: {:#?}", layer.get_params_mut());
-            // println!("grads: {:#?}", layer_gradients);
+            println!("[opt] bias grads: {}", bias_grads);
+            println!("[opt] biases {}", layer.get_params_mut().1);
 
-            let layer_params = layer.get_params_mut();
-            for (weight, delta) in layer_params.0.iter_mut().zip(&layer_gradients.0) {
-                *weight -= delta * self.learning_rate;
+            let (weights, biases) = layer.get_params_mut();
+            for (weight, weight_grad) in weights.iter_mut().zip(weight_grads) {
+                *weight -= weight_grad * self.learning_rate;
             }
-            for (bias, delta) in layer_params.1.iter_mut().zip(&layer_gradients.1) {
-                *bias -= delta * self.learning_rate;
+            for (bias, bias_grad) in biases.iter_mut().zip(bias_grads) {
+                *bias -= bias_grad * self.learning_rate;
             }
         }
     }

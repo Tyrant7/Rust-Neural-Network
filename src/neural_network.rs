@@ -1,3 +1,4 @@
+use colored::Colorize;
 use ndarray::{Array, Array2};
 
 use crate::layer::Layer;
@@ -14,7 +15,7 @@ impl NeuralNetwork {
     }
 
     pub fn forward(&self, inputs: &Array2<f32>) -> (Vec<Array2<f32>>, Vec<Array2<f32>>) {
-
+        
         // Track each layer of activations through the network, this is what we'll be returning
         // In this case, the last layer of activations represents the network's output
         let mut activations: Vec<Array2<f32>> = Vec::new();
@@ -23,11 +24,15 @@ impl NeuralNetwork {
         for layer_i in 0..self.layers.len() {
 
             // Get the input to the current layer, whatever came last
-            let previous_layer: &Array2<f32> = match (layer_i as i32 - 1) < 0 {
+            let previous_layer: &Array2<f32> = match layer_i == 0 {
                 true => inputs,
                 false => &activations[layer_i - 1]
             };
             let layer = &self.layers[layer_i];
+
+            if layer_i == 1 {
+                println!("{} {}", "Middle layer".bright_blue(), previous_layer)
+            }
 
             // Forward through the current layer, but without activation
             let transfer_layer = layer.forward(previous_layer);
@@ -35,9 +40,9 @@ impl NeuralNetwork {
             let layer_activations = layer.activate(transfer_layer);
 
             println!("Forward");
-            println!("layer    {:?}", layer.get_params().0.shape());
-            println!("previous {:?}", previous_layer.shape());
-            println!("next     {:?}", layer_activations.shape());
+            println!("layer shape    {:?}", layer.get_params().0.shape());
+            println!("previous shape {:?}", previous_layer.shape());
+            println!("act shape     {:?}", layer_activations.shape());
 
             // Push to the stack for next layer
             activations.push(layer_activations);
@@ -59,7 +64,7 @@ impl NeuralNetwork {
 
         // TODO: loss functions
         let error = final_output - targets_array;
-        println!("Error: {}", error);
+        println!("Error: {}", error.first().unwrap());
 
         let mut output_gradient = error;
 
@@ -68,7 +73,7 @@ impl NeuralNetwork {
         for layer_i in (0..self.layers.len()).rev() {
             let layer = &self.layers[layer_i];
             // Check we underflow (to determine if we are on the input layer)            
-
+            
             let transfer_layer = &transfers[layer_i];
 
             let is_input_layer = layer_i == 0;

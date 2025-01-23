@@ -13,6 +13,7 @@ use activation_functions::ActivationFunction::{ReLU, Sigmoid};
 pub mod neural_network;
 use ndarray::Array2;
 use neural_network::NeuralNetwork;
+use colored::Colorize;
 
 pub mod optimizers;
 use optimizer::Optimizer;
@@ -31,13 +32,20 @@ pub fn test_xor() {
     };
 
     // All inputs of XOR matched to their respective outputs
-    let train_data = [
-        ([0., 0.], [0.]),
-        ([0., 1.], [1.]),
-        ([1., 0.], [1.]),
-        ([1., 1.], [0.]),
+    // let train_data = [
+    //     ([0., 0.], [0.]),
+    //     ([0., 1.], [1.]),
+    //     ([1., 0.], [1.]),
+    //     ([1., 1.], [0.]),
+    // ];
+    let inputs: Vec<f32> = vec![
+        0., 0.,
+        0., 1.,
+        1., 0.,
+        1., 1.,
     ];
-
+    let expected = vec![0., 1., 1., 0.];
+    
     println!("Beginning training a network to solve XOR problem....");
 
     for generation in 0..1000 {
@@ -57,35 +65,57 @@ pub fn test_xor() {
             }
         }
 
-        for (inputs, expected) in train_data.iter() {
+        let inputs_array = Array2::from_shape_vec((inputs.len() / 2, 2), inputs.to_vec()).unwrap();
+        println!("INPUTS {}", inputs_array);
+        
+        let (activations, transfers) = network.forward(&inputs_array);
+        let gradients = network.backwards(&activations, &transfers, &inputs_array, expected.clone());
 
-            let inputs_array = Array2::from_shape_vec((inputs.len(), 1), inputs.to_vec()).unwrap();
+        // Calculate mean absolute error for analysis
+        let final_output = activations.last().unwrap();
+        println!("output {} target {}", final_output.first().unwrap(), expected[0]);
+        let targets_array = Array2::from_shape_fn((expected.len(), 1), |(j, _k)| expected[j]);
+        generation_error += (final_output - &targets_array).abs().sum();
 
-            let (activations, transfers) = network.forward(&inputs_array);
-            let gradients = network.backwards(&activations, &transfers, &inputs_array, Vec::from(expected));
+        // optimizer.update(&mut network, &gradients);
 
-            // Calculate mean absolute error for analysis
-            let final_output = activations.last().unwrap();
-            println!("output {} target {}", final_output.first().unwrap(), expected[0]);
-            let targets_array = Array2::from_shape_fn((expected.len(), 1), |(j, _k)| expected[j]);
-            generation_error += (final_output - &targets_array).abs().sum();
+        for (layer_i, (weights, biases)) in gradients.iter().enumerate() {
 
-            // optimizer.update(&mut network, &gradients);
+            let layer_batch_grads = &mut gen_grads[layer_i];
 
-            for (layer_i, (weights, biases)) in gradients.iter().enumerate() {
-
-                let layer_batch_grads = &mut gen_grads[layer_i];
-
-                layer_batch_grads.0 += weights;
-                layer_batch_grads.1 += biases;
-            }
+            layer_batch_grads.0 += weights;
+            layer_batch_grads.1 += biases;
         }
+
+        // for (inputs, expected) in train_data.iter() {
+
+        //     let inputs_array = Array2::from_shape_vec((inputs.len(), 1), inputs.to_vec()).unwrap();
+
+        //     let (activations, transfers) = network.forward(&inputs_array);
+        //     let gradients = network.backwards(&activations, &transfers, &inputs_array, Vec::from(expected));
+
+        //     // Calculate mean absolute error for analysis
+        //     let final_output = activations.last().unwrap();
+        //     println!("output {} target {}", final_output.first().unwrap(), expected[0]);
+        //     let targets_array = Array2::from_shape_fn((expected.len(), 1), |(j, _k)| expected[j]);
+        //     generation_error += (final_output - &targets_array).abs().sum();
+
+        //     // optimizer.update(&mut network, &gradients);
+
+        //     for (layer_i, (weights, biases)) in gradients.iter().enumerate() {
+
+        //         let layer_batch_grads = &mut gen_grads[layer_i];
+
+        //         layer_batch_grads.0 += weights;
+        //         layer_batch_grads.1 += biases;
+        //     }
+        // }
 
         // Optimize parameters
         optimizer.update(&mut network, &gen_grads);
 
-        generation_error /= train_data.len() as f32;
-        println!("Generation {} error: {}", generation, generation_error);
+        generation_error /= inputs.len() as f32;
+        println!("{} {} {}", "Generation error: ".bright_green(), generation, generation_error);
     }
 }
 
